@@ -5,7 +5,10 @@ from s2clientprotocol import spatial_pb2 as sc_spatial
 from pysc2.lib import features
 from pysc2.lib.actions import FUNCTIONS, TYPES
 
-CAT = features.FeatureType.CATEGORICAL
+# 设置要保存的feature信息
+
+CAT = features.FeatureType.CATEGORICAL # 分类数据
+
 
 # 默认参数
 DEFAULT_ARGS = dict(
