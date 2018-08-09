@@ -1,9 +1,5 @@
 from pysc2.env import sc2_env
-from multiprocessing import Process, Pipe
-^
-|
-|
-# 多进程及通信
+from multiprocessing import Process, Pipe # 多进程及通信
 
 def make_envs(args):
     env_args = dict(map_name=args.map, step_mul=8, game_steps_per_episode=0) 
@@ -12,7 +8,7 @@ def make_envs(args):
 
 # based on https://github.com/ikostrikov/pytorch-a2c-ppo-acktr/blob/master/envs.py
 def make_env(sz=32, **params):
-'''加入两个参数并转换为SC2_ENV环境'''
+    '''加入两个参数并转换为SC2_ENV环境'''
     def _thunk():
         params['screen_size_px'] = params['minimap_size_px'] = (sz, sz)
         env = sc2_env.SC2Env(**params)
