@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.contrib import layers
 
+# 定义和实现了模型
 
 def fully_conv(config):
     screen, screen_input = cnn_block(config.sz, config.screen_dims(), config.embed_dim_fn)

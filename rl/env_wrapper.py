@@ -1,6 +1,8 @@
 from pysc2.lib.actions import FunctionCall, FUNCTIONS
 from common.config import DEFAULT_ARGS, is_spatial
 
+# 环境的包装，将动作包装为环境需要的格式， 将返回的数据也包装为可用的格式
+
 
 class EnvWrapper:
     def __init__(self, envs, config):

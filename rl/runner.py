@@ -3,6 +3,7 @@ import numpy as np
 from baselines import logger
 from common import flatten_lists
 
+# 仿照run_loop，实现环境与agent的交互
 
 class Runner:
     def __init__(self, envs, agent, n_steps=8):
@@ -15,9 +16,9 @@ class Runner:
         try:
             for i in range(num_updates):
                 self.logs['updates'] += 1
-                rollout = self.collect_rollout()
+                rollout = self.collect_rollout() # 交互并收集训练数据
                 if train:
-                    self.agent.train(i, *rollout)
+                    self.agent.train(i, *rollout) # 训练
         except KeyboardInterrupt:
             pass
         finally:
@@ -25,9 +26,9 @@ class Runner:
             frames = self.envs.num_envs * self.n_steps * self.logs['updates']
             print("Took %.3f seconds for %s steps: %.3f fps" % (elapsed_time, frames, frames / elapsed_time))
 
-    def collect_rollout(self):
+    def collect_rollout(self): # 交互并收集训练数据
         states, actions = [None]*self.n_steps, [None]*self.n_steps
-        rewards, dones, values = np.zeros((3, self.n_steps, self.envs.num_envs))
+        rewards, dones, values = np.zeros((3, self.n_steps, self.envs.num_envs)) # 设置几步返回一次reward
 
         for step in range(self.n_steps):
             action, values[step] = self.agent.act(self.state)
