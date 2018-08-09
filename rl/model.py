@@ -25,7 +25,7 @@ def fully_conv(config):
     return [policy, value], [screen_input, minimap_input] + non_spatial_inputs
 
 
-def cnn_block(sz, dims, embed_dim_fn):
+def cnn_block(sz, dims, embed_dim_fn): # CNN(空间信息层)
     block_input = tf.placeholder(tf.float32, [None, sz, sz, len(dims)])
     block = tf.transpose(block_input, [0, 3, 1, 2]) # NHWC -> NCHW
 
@@ -44,7 +44,7 @@ def cnn_block(sz, dims, embed_dim_fn):
     return conv2, block_input
 
 
-def non_spatial_block(sz, dims, idx):
+def non_spatial_block(sz, dims, idx): # 非空间信息层
     block_inputs = [tf.placeholder(tf.float32, [None, *dim]) for dim in dims]
     # TODO currently too slow with full inputs
     # block = [broadcast(block_inputs[i], sz) for i in range(len(dims))]
@@ -58,6 +58,6 @@ def broadcast(tensor, sz):
     return tf.tile(tf.expand_dims(tf.expand_dims(tensor, 2), 3), [1, 1, sz, sz])
 
 
-def mask_probs(probs, mask):
+def mask_probs(probs, mask): # 将 available_actions 中不允许的动作概率置为0
     masked = probs * mask
     return masked / tf.clip_by_value(tf.reduce_sum(masked, axis=1, keep_dims=True), 1e-12, 1.0)

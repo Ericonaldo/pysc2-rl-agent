@@ -7,6 +7,7 @@ from pysc2.lib.actions import FUNCTIONS, TYPES
 
 CAT = features.FeatureType.CATEGORICAL
 
+# 默认参数
 DEFAULT_ARGS = dict(
     screen=0, # converts to (0,0)
     minimap=0,
@@ -23,6 +24,7 @@ DEFAULT_ARGS = dict(
     unload_id=0
 )
 
+# 结构化信息
 # name => dims
 NON_SPATIAL_FEATURES = dict(
     player=(11,),
@@ -47,7 +49,7 @@ class Config:
         self.feats = self.acts = self.act_args = self.arg_idx = self.ns_idx = None
 
     def build(self, cfg_path):
-        feats, acts, act_args = self._load(cfg_path)
+        feats, acts, act_args = self._load(cfg_path) # 加载参数，若参数不存在则保存
 
         if 'screen' not in feats:
             feats['screen'] = features.SCREEN_FEATURES._fields
@@ -90,21 +92,21 @@ class Config:
         return [NON_SPATIAL_FEATURES[f] for f in self.feats['non_spatial']]
 
     # TODO maybe move preprocessing code into separate class?
-    def preprocess(self, obs):
+    def preprocess(self, obs): # 将输入的信息转换为矩阵输入
         return [self._preprocess(obs, _type) for _type in ['screen', 'minimap'] + self.feats['non_spatial']]
 
     def _dims(self, _type):
-        return [f.scale**(f.type == CAT) for f in self._feats(_type)]
+        return [f.scale**(f.type == CAT) for f in self._feats(_type)] # 若是分类数据则维度为分类的类别，若是数值数据则是1
 
     def _feats(self, _type):
-        feats = getattr(features, _type.upper() + '_FEATURES')
-        return [getattr(feats, f_name) for f_name in self.feats[_type]]
+        feats = getattr(features, _type.upper() + '_FEATURES') # 获得features.*_FEATURES
+        return [getattr(feats, f_name) for f_name in self.feats[_type]] # 获得feats[*]中的数据，子图
 
     def _preprocess(self, obs, _type):
         if _type in self.feats['non_spatial']:
             return np.array([self._preprocess_non_spatial(ob, _type) for ob in obs])
-        spatial = [[ob[_type][f.index] for f in self._feats(_type)] for ob in obs]
-        return np.array(spatial).transpose((0, 2, 3, 1))
+        spatial = [[ob[_type][f.index] for f in self._feats(_type)] for ob in obs] # 将所有spatial的子图拼在一起
+        return np.array(spatial).transpose   ((0, 2, 3, 1))
 
     def _preprocess_non_spatial(self, ob, _type):
         if _type == 'available_actions':

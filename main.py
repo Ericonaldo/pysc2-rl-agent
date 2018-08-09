@@ -9,7 +9,8 @@ from rl.model import fully_conv
 from rl import Runner, EnvWrapper
 
 if __name__ == '__main__':
-    flags.FLAGS(['main.py'])
+    flags.FLAGS(['main.py']) # 注册Flag对象，这里应该没有用
+    '''解析命令行参数'''
     parser = argparse.ArgumentParser()
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument("--sz", type=int, default=32)
@@ -30,25 +31,25 @@ if __name__ == '__main__':
     parser.add_argument('--save_replay', type=bool, nargs='?', const=True, default=False)
     args = parser.parse_args()
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu) #environ是一个字符串所对应环境的映像对象，要使用的GPU number
     tf.reset_default_graph()
     sess = tf.Session()
 
     # config = Config(args.sz, args.map, lambda _: 1)
-    config = Config(args.sz, args.map, args.run_id)
+    config = Config(args.sz, args.map, args.run_id) # 进行参数的设置
     os.makedirs('weights/' + config.full_id(), exist_ok=True)
-    cfg_path = 'weights/%s/config.json' % config.full_id()
-    config.build(cfg_path if args.restore else args.cfg_path)
+    cfg_path = 'weights/%s/config.json' % config.full_id() # 保存参数的位置
+    config.build(cfg_path if args.restore else args.cfg_path) # 建立和设置参数
     if not args.restore and not args.test:
-        config.save(cfg_path)
+        config.save(cfg_path) # 保存参数
 
-    envs = EnvWrapper(make_envs(args), config)
-    agent = A2CAgent(sess, fully_conv, config, args.restore, args.discount, args.lr, args.vf_coef, args.ent_coef, args.clip_grads)
+    envs = EnvWrapper(make_envs(args), config) # 创建环境
+    agent = A2CAgent(sess, fully_conv, config, args.restore, args.discount, args.lr, args.vf_coef, args.ent_coef, args.clip_grads) #创建agent
 
-    runner = Runner(envs, agent, args.steps)
-    runner.run(args.updates, not args.test)
+    runner = Runner(envs, agent, args.steps) # 创建线程
+    runner.run(args.updates, not args.test) # 开始运行
 
-    if args.save_replay:
+    if args.save_replay: #是否保存回放
         envs.save_replay()
 
-    envs.close()
+    envs.close() # 关闭环境
