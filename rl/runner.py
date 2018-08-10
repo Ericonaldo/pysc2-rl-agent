@@ -69,7 +69,6 @@ class Runner:
         logger.logkv('rew_mestd', np.std(self.logs['ep_rew'])) # weird name to ensure it's above min since logger sorts
         logger.logkv('rew_min', np.min(self.logs['ep_rew']))
         logger.dumpkvs()
-        tf.summary.histogram("rew_mean", np.mean(self.logs['ep_rew'])
 
         self.logs['dones'] = np.zeros(self.envs.num_envs)
         self.logs['ep_rew'] = np.zeros(self.envs.num_envs)
