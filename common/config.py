@@ -63,11 +63,11 @@ class Config:
         self.feats = feats
 
         # TODO not connected to anything atm
-        if acts is None:
+        if acts is None: # 动作函数
             acts = FUNCTIONS # <pysc2.lib.actions.Functions object at 0x7f74386f4160>
         self.acts = acts
 
-        if act_args is None:
+        if act_args is None: # 动作函数的参数
             act_args = TYPES._fields # ('screen', 'minimap', 'screen2', 'queued', 'control_group_act', 'control_group_id', 'select_point_act', 'select_add', 'select_unit_act', 'select_unit_id', 'select_worker', 'build_queue_id', 'unload_id')
         self.act_args = act_args
 
@@ -82,8 +82,9 @@ class Config:
             return self.map_id()
         return self.map_id() + "/" + str(self.run_id)
 
-    def policy_dims(self):
-        return [(len(self.acts), 0)] + [(getattr(TYPES, arg).sizes[0], is_spatial(arg)) for arg in self.act_args]
+    def policy_dims(self): # len(self.acts) 表示动作函数的个数为524， is_spatial()查询是否为空间动作参数，将两个部分拼接起来
+        return [(len(self.acts), 0)] + [(getattr(TYPES, arg).sizes[0], is_spatial(arg)) for arg in self.act_args] # [(524, 0)] + [(0, True), (0, True), (0, True), (2, False), (5, False), (10, False), (4, False), (2, False), (4, False), (500, False), (4, False), (10, False), (500, False)]
+
 
     def screen_dims(self):
         return self._dims('screen')
@@ -95,7 +96,7 @@ class Config:
         return [NON_SPATIAL_FEATURES[f] for f in self.feats['non_spatial']]
 
     # TODO maybe move preprocessing code into separate class?
-    def preprocess(self, obs): # 将输入的信息转换为矩阵输入
+    def preprocess(self, obs): # 预处理环境的所有观测量为需要的输入格式
         return [self._preprocess(obs, _type) for _type in ['screen', 'minimap'] + self.feats['non_spatial']]
 
     def _dims(self, _type):
@@ -105,18 +106,18 @@ class Config:
         feats = getattr(features, _type.upper() + '_FEATURES') # 获得features.*_FEATURES　(minimap, screen, non-spatial)
         return [getattr(feats, f_name) for f_name in self.feats[_type]] # 获得feats[*]中的数据，子图，返回格式为: [subinfo1, subinfo2, ...]
 
-    def _preprocess(self, obs, _type):
+    def _preprocess(self, obs, _type): # 预处理环境的某个观测量为需要的输入格式
         if _type in self.feats['non_spatial']: #　如果是non_spatial的信息则返回列表，迭代其中的sub info，用_preprocess_non_spatial(self, ob, _type)处理
             return np.array([self._preprocess_non_spatial(ob, _type) for ob in obs])
-        spatial = [[ob[_type][f.index] for f in self._feats(_type)] for ob in obs] # 将所有spatial的子图拼在一起, f.index是subinfo的索引, shape=[1, obs_dim, num_features, num_feature_info=8]
-        return np.array(spatial).transpose((0, 2, 3, 1)) # [1, num_features, num_feature_info=8, obs_dim] 
+        spatial = [[ob[_type][f.index] for f in self._feats(_type)] for ob in obs] # 将所有spatial的子图拼在一起, f.index是subinfo的索引, shape=[obs_dim, num_subfeatures, subfeatures_h, subfeatures_w]
+        return np.array(spatial).transpose((0, 2, 3, 1)) # [obs_dim, subfeatures_h, subfeatures_w, num_subfeatures] 
 
-    def _preprocess_non_spatial(self, ob, _type):
+    def _preprocess_non_spatial(self, ob, _type): # 预处理non_spatial信息，被上面调用
         if _type == 'available_actions':
             acts = np.zeros(len(self.acts))
             acts[ob['available_actions']] = 1
             return acts # 返回act,　可用的为1，不可用为0
-        return ob[_type]
+        return ob[_type] # 返回观测到的信息
 
     def save(self, cfg_path):
         with open(cfg_path, 'w') as fl:
@@ -128,5 +129,5 @@ class Config:
         return data.get('feats'), data.get('acts'), data.get('act_args')
 
 
-def is_spatial(arg):
+def is_spatial(arg): # 判断动作信息是不是spatial的信息
     return arg in ['screen', 'screen2', 'minimap']
