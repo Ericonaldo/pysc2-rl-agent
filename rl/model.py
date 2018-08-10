@@ -27,10 +27,10 @@ def fully_conv(config):
 
 
 def cnn_block(sz, dims, embed_dim_fn): # CNN(空间信息层)
-    block_input = tf.placeholder(tf.float32, [None, sz, sz, len(dims)])
-    block = tf.transpose(block_input, [0, 3, 1, 2]) # NHWC -> NCHW
+    block_input = tf.placeholder(tf.float32, [None, sz, sz, len(dims)]) # dim 为列表，用了几个feature map则len(dims)=几 　->　 [None, 32, 32, len(dims)]
+    block = tf.transpose(block_input, [0, 3, 1, 2]) # NHWC -> NCHW   [None, len(dims), 32, 32]
 
-    block = tf.split(block, len(dims), axis=1)
+    block = tf.split(block, len(dims), axis=1)  # [None, 1, 32, 32]
     for i, d in enumerate(dims):
         if d > 1:
             block[i] = tf.one_hot(tf.to_int32(tf.squeeze(block[i], axis=1)), d, axis=1)
