@@ -44,7 +44,7 @@ if __name__ == '__main__':
         config.save(cfg_path) # 保存参数
 
     envs = EnvWrapper(make_envs(args), config) # 创建环境,封装一层
-    agent = A2CAgent(sess, fully_conv, config, args.restore, args.discount, args.lr, args.vf_coef, args.ent_coef, args.clip_grads) #创建agent
+    agent = A2CAgent(sess, fully_conv, config, args.restore, args.discount, args.lr, args.vf_coef, args.ent_coef, args.clip_grads) # 创建agent
 
     runner = Runner(envs, agent, args.steps) # 创建线程
     runner.run(args.updates, not args.test) # 开始运行
