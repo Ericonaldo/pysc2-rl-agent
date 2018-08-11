@@ -60,11 +60,9 @@ def broadcast(tensor, sz):
 
 
 def mask_probs(probs, mask): # 将 available_actions 中不允许的动作概率置为0
-    masked = probs * mask
+    masked = probs * mask # [None, 524]
     correction = tf.cast(
         tf.reduce_sum(masked, axis=-1, keep_dims=True) < 1e-3, dtype=tf.float32
-    ) * (
-                         1.0 / (tf.reduce_sum(mask, axis=-1, keep_dims=True) + 1e-12)
-                 ) * mask
+        ) * (1.0 / (tf.reduce_sum(mask, axis=-1, keep_dims=True) + 1e-12)) * mask  # 第一项判断是否小于阈值， 第二项乘 (1/可用动作数量)
     masked += correction
-    return masked / tf.clip_by_value(tf.reduce_sum(masked, axis=1, keep_dims=True), 1e-12, 1.0)
+    return masked / tf.clip_by_value(tf.reduce_sum(masked, axis=1, keep_dims=True), 1e-12, 1.0) # 归一化
