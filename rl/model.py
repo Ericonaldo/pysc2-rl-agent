@@ -4,12 +4,12 @@ from tensorflow.contrib import layers
 # 定义和实现了模型
 
 def fully_conv(config):
-    screen, screen_input = cnn_block(config.sz, config.screen_dims(), config.embed_dim_fn) # [None, 32, 30, 30]
-    minimap, minimap_input = cnn_block(config.sz, config.minimap_dims(), config.embed_dim_fn) # [None, 32, 30, 30]
+    screen, screen_input = cnn_block(config.sz, config.screen_dims(), config.embed_dim_fn) # [None, 32, 32, 32]
+    minimap, minimap_input = cnn_block(config.sz, config.minimap_dims(), config.embed_dim_fn) # [None, 32, 32, 32]
     non_spatial, non_spatial_inputs = non_spatial_block(config.sz, config.non_spatial_dims(), config.ns_idx) # [None, 11, 32, 32]
 
-    state = tf.concat([screen, minimap, non_spatial], axis=1) # [None, 64+11, 30, 30]
-    fc1 = layers.fully_connected(layers.flatten(state), num_outputs=256) # [None, 64*30*30]->[None, 256]
+    state = tf.concat([screen, minimap, non_spatial], axis=1) # [None, 64+11, 32, 32]
+    fc1 = layers.fully_connected(layers.flatten(state), num_outputs=256) # [None, 64*32*32]->[None, 256]
     value = tf.squeeze(layers.fully_connected(fc1, num_outputs=1, activation_fn=None), axis=1) # [None, 1]->[None]
 
     # TODO mask unused args
