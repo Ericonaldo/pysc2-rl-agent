@@ -15,13 +15,13 @@ def fully_conv(config):
     # TODO mask unused args
     # inspired by https://github.com/simonmeister/pysc2-rl-agents/blob/master/rl/networks/fully_conv.py#L131-L137
     policy = []
-    for dim, is_spatial in config.policy_dims():
+    for dim, is_spatial in config.policy_dims(): # [(524, 0), (0, True), (0, True), (0, True), (2, False), (5, False), (10, False), (4, False), (2, False), (4, False), (500, False), (4, False), (10, False), (500, False)]
         if is_spatial:
-            logits = layers.conv2d(state, num_outputs=1, kernel_size=1, activation_fn=None, data_format="NCHW") # [None, 1, 30, 30]
-            policy.append(tf.nn.softmax(layers.flatten(logits))) # [None, 30 * 30]
+            logits = layers.conv2d(state, num_outputs=1, kernel_size=1, activation_fn=None, data_format="NCHW") # [None, 1, 32, 32]
+            policy.append(tf.nn.softmax(layers.flatten(logits))) # [None, 32*32=1024]
         else:
-            policy.append(layers.fully_connected(fc1, num_outputs=dim, activation_fn=tf.nn.softmax))
-    policy[0] = mask_probs(policy[0], non_spatial_inputs[config.ns_idx['available_actions']])
+            policy.append(layers.fully_connected(fc1, num_outputs=dim, activation_fn=tf.nn.softmax)) # [None, dim]
+    policy[0] = mask_probs(policy[0], non_spatial_inputs[config.ns_idx['available_actions']]) # policy[0]是动作函数，[None, 524]
 
     return [policy, value], [screen_input, minimap_input] + non_spatial_inputs
 
