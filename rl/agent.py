@@ -11,13 +11,16 @@ class A2CAgent:
 
         (self.policy, self.value), self.inputs = model_fn(config)
         self.action = [sample(p) for p in self.policy]
-        loss_fn, self.loss_inputs = self._loss_func()
-
-        self.step = tf.Variable(0, trainable=False)
-        opt = tf.train.RMSPropOptimizer(learning_rate=lr, decay=0.99, epsilon=1e-5)
-        # opt = tf.train.AdamOptimizer(learning_rate=lr, epsilon=1e-5)
-        self.train_op = layers.optimize_loss(loss=loss_fn, optimizer=opt, learning_rate=None, global_step=self.step, clip_gradients=clip_grads)
-        self.sess.run(tf.global_variables_initializer())
+            
+        with tf.variable_scope('loss'):
+            loss_fn, self.loss_inputs = self._loss_func()
+        
+        with tf.variable_scope('train'):
+            self.step = tf.Variable(0, trainable=False)
+            opt = tf.train.RMSPropOptimizer(learning_rate=lr, decay=0.99, epsilon=1e-5)
+            # opt = tf.train.AdamOptimizer(learning_rate=lr, epsilon=1e-5)
+            self.train_op = layers.optimize_loss(loss=loss_fn, optimizer=opt, learning_rate=None, global_step=self.step, clip_gradients=clip_grads)
+            self.sess.run(tf.global_variables_initializer())
 
         self.saver = tf.train.Saver()
         if restore:
