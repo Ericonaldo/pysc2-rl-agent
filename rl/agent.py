@@ -9,8 +9,8 @@ class A2CAgent:
         self.sess, self.config, self.discount = sess, config, discount
         self.vf_coef, self.ent_coef = vf_coef, ent_coef
 
-        (self.policy, self.value), self.inputs = model_fn(config)
-        self.action = [sample(p) for p in self.policy]
+        (self.policy, self.value), self.inputs = model_fn(config) # policy[0]是one_hot动作函数，shape = [None, 524];  policy[1:]为13个one_hot参数shape = [[None, dim1], [None, dim2],...], spatial的feature维度是1024
+        self.action = [sample(p) for p in self.policy] # action 返回的是数值
             
         with tf.variable_scope('loss'):
             loss_fn, self.loss_inputs = self._loss_func()
@@ -53,7 +53,7 @@ class A2CAgent:
 
     def _loss_func(self):
         returns = tf.placeholder(tf.float32, [None])
-        actions = [tf.placeholder(tf.int32, [None]) for _ in range(len(self.policy))]
+        actions = [tf.placeholder(tf.int32, [None]) for _ in range(len(self.policy))] # policy is a list, actions is a list  每个元素对应动作函数或参数
 
         adv = tf.stop_gradient(returns - self.value)
         logli = sum([clip_log(select(a, p)) for a, p in zip(actions, self.policy)])
@@ -78,8 +78,8 @@ class A2CAgent:
         return returns.flatten()
 
 
-def select(acts, policy):
-    return tf.gather_nd(policy, tf.stack([tf.range(tf.shape(policy)[0]), acts], axis=1))
+def select(acts, policy): # 传入的policy.shape = [batch, dim_i], acts.shape=[batch]
+    return tf.gather_nd(policy, tf.stack([tf.range(tf.shape(policy)[0]), acts], axis=1)) # 把act对应的policy的值取出来
 
 
 # based on https://github.com/pekaalto/sc2aibot/blob/master/common/util.py#L5-L11

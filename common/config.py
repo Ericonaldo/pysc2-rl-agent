@@ -9,8 +9,7 @@ from pysc2.lib.actions import FUNCTIONS, TYPES
 
 CAT = features.FeatureType.CATEGORICAL # 分类数据
 
-
-# 默认参数
+# 动作函数的13个参数
 DEFAULT_ARGS = dict(
     screen=0, # converts to (0,0)
     minimap=0,
@@ -42,6 +41,7 @@ NON_SPATIAL_FEATURES = dict(
     control_groups=(10, 2),
 )
 
+SZ = 32
 
 class Config:
     # TODO extract embed_dim_fn to config
@@ -50,6 +50,7 @@ class Config:
         self.sz, self.map = sz, map
         self.embed_dim_fn = embed_dim_fn
         self.feats = self.acts = self.act_args = self.arg_idx = self.ns_idx = None
+        SZ=sz
 
     def build(self, cfg_path):
         feats, acts, act_args = self._load(cfg_path) # 加载参数，若参数不存在则保存
@@ -71,7 +72,7 @@ class Config:
             act_args = TYPES._fields # ('screen', 'minimap', 'screen2', 'queued', 'control_group_act', 'control_group_id', 'select_point_act', 'select_add', 'select_unit_act', 'select_unit_id', 'select_worker', 'build_queue_id', 'unload_id')
         self.act_args = act_args
 
-        self.arg_idx = {arg: i for i, arg in enumerate(self.act_args)} 
+        self.arg_idx = {arg: i for i, arg in enumerate(self.act_args)} #生成对应的字典，序号: 参数名
         self.ns_idx = {f: i for i, f in enumerate(self.feats['non_spatial'])} #生成对应的字典，参数名：序号
 
     def map_id(self):

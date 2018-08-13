@@ -9,8 +9,8 @@ class EnvWrapper:
         self.envs, self.config = envs, config
 
     def step(self, acts):
-        acts = self.wrap_actions(acts)
-        results = self.envs.step(acts)
+        acts = self.wrap_actions(acts) # 包装acts
+        results = self.envs.step(acts) # 包装results
         return self.wrap_results(results)
 
     def reset(self):
@@ -21,12 +21,12 @@ class EnvWrapper:
         acts, args = actions[0], actions[1:]
 
         wrapped_actions = []
-        for i, act in enumerate(acts):
+        for i, act in enumerate(acts): # 对于batch中的每个act函数
             act_args = []
-            for arg_type in FUNCTIONS[act].args:
-                act_arg = [DEFAULT_ARGS[arg_type.name]]
+            for arg_type in FUNCTIONS[act].args: # 对于该动作函数的每个参数
+                act_arg = [DEFAULT_ARGS[arg_type.name]] # 初始化
                 if arg_type.name in self.config.act_args:
-                    act_arg = [args[self.config.arg_idx[arg_type.name]][i]]
+                    act_arg = [args[self.config.arg_idx[arg_type.name]][i]] # 等于bacth中对应参数的第i项(第i个样本)
                 if is_spatial(arg_type.name):  # spatial args, convert to coords
                     act_arg = [act_arg[0] % self.config.sz, act_arg[0] // self.config.sz]  # (y,x), fix for PySC2
                 act_args.append(act_arg)

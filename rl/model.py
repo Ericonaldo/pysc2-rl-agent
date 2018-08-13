@@ -21,9 +21,9 @@ def fully_conv(config):
             policy.append(tf.nn.softmax(layers.flatten(logits))) # [None, 32*32=1024]
         else:
             policy.append(layers.fully_connected(fc1, num_outputs=dim, activation_fn=tf.nn.softmax)) # [None, dim]
-    policy[0] = mask_probs(policy[0], non_spatial_inputs[config.ns_idx['available_actions']]) # policy[0]是动作函数，[None, 524]
+    policy[0] = mask_probs(policy[0], non_spatial_inputs[config.ns_idx['available_actions']]) 
 
-    return [policy, value], [screen_input, minimap_input] + non_spatial_inputs
+    return [policy, value], [screen_input, minimap_input] + non_spatial_inputs # policy[0]是one_hot动作函数，[None, 524];  policy[1:]为13个one_hot参数[[None, dim1], [None, dim2],...], spatial的feature维度是1024
 
 
 def cnn_block(sz, dims, embed_dim_fn): # CNN(空间信息层)
