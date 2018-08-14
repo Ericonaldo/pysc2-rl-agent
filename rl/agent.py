@@ -38,10 +38,10 @@ class A2CAgent:
         returns = self._compute_returns(rewards, dones, last_value)
 
         feed_dict = dict(zip(self.inputs + self.loss_inputs, states + actions + [returns])) # 你非得写成这样令人看了得转个弯才能看懂吗
-        result, result_summary, step = self.sess.run([self.train_op, self.summary_op, self.step], feed_dict)
+        result, result_summary, step = self.sess.run([self.train_op, self.summary_op, self.step], feed_dict) # 每次训练都记录summary
 
         self.summary_writer.add_summary(result_summary, step)
-        self.summary_writer.add_summary(summarize(rewards=ep_rews), step)
+        self.summary_writer.add_summary(summarize(rewards=ep_rews), step) # 每次训练添加数据到tensorboard， ep_rews是每个env在一个episode内（n_step）平均的reward
 
         return result
 

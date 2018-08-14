@@ -6,7 +6,7 @@ from common import flatten_lists
 # 仿照run_loop，实现环境与agent的交互
 
 class Runner:
-    def __init__(self, envs, agent, n_steps=8):
+    def __init__(self, envs, agent, n_steps=8): # n_step表示经过多少步训练一次
         self.state = self.logs = self.ep_rews = None
         self.agent, self.envs, self.n_steps = agent, envs, n_steps
 
@@ -28,14 +28,15 @@ class Runner:
 
     def collect_rollout(self): # 交互并收集训练数据
         states, actions = [None]*self.n_steps, [None]*self.n_steps
-        rewards, dones, values = np.zeros((3, self.n_steps, self.envs.num_envs)) # 设置几步返回一次reward
+        rewards, dones, values = np.zeros((3, self.n_steps, self.envs.num_envs))
 
         for step in range(self.n_steps):
             action, values[step] = self.agent.act(self.state)
             states[step], actions[step] = self.state, action
             self.state, rewards[step], dones[step] = self.envs.step(action)
+            dones[step] = (dones[step].astype(int) | dones[step-1].astype(int)).astype(float) # 已经结束的就不再继续
 
-            self.log(rewards[step], dones[step])
+            self.log(rewards[step], dones[step]) # 存储本次训练的n_step中的reward的信息，一个reward[step]包含envs.num_envs个元素
 
         last_value = self.agent.get_value(self.state)
 
@@ -47,9 +48,11 @@ class Runner:
                      'ep_rew': np.zeros(self.envs.num_envs), 'dones': np.zeros(self.envs.num_envs)}
 
     def log(self, rewards, dones): # 记录训练数据
-        self.logs['ep_rew'] += rewards
         self.logs['dones'] = np.maximum(self.logs['dones'], dones)
-        if sum(self.logs['dones']) < self.envs.num_envs:
+        for e in range(self.envs.num_envs): # 已经结束了就不加reward了
+            if self.logs['dones'][e] < 1:
+                self.logs['ep_rew'][e] += rewards[e]
+        if sum(self.logs['dones']) < self.envs.num_envs: # 若没有全结束， 则返回
             return
         self.logs['eps'] += self.envs.num_envs
         self.logs['rew_best'] = max(self.logs['rew_best'], np.mean(self.logs['ep_rew']))
@@ -71,4 +74,4 @@ class Runner:
         logger.dumpkvs()
 
         self.logs['dones'] = np.zeros(self.envs.num_envs)
-        self.logs['ep_rew'] = np.zeros(self.envs.num_envs)
+        self.logs['ep_rew'] = np.zeros(self.envs.num_envs) # 清空

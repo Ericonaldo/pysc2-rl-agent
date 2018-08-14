@@ -34,8 +34,8 @@ class EnvWrapper:
 
         return wrapped_actions
 
-    def wrap_results(self, results):
-        obs = [res.observation for res in results]
+    def wrap_results(self, results): # results 由每个进程组成的list
+        obs = [res.observation for res in results] 
         rewards = [res.reward for res in results]
         dones = [res.last() for res in results]
 

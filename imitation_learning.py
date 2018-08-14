@@ -16,7 +16,7 @@ if __name__ == '__main__':
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument("--sz", type=int, default=32)
     parser.add_argument('--lr', type=float, default=7e-4)
-    parser.add_argument('--samples', type=int, default=10000)
+    parser.add_argument('--samples', type=int, default=100000)
     parser.add_argument('--batch_sz', type=int, default=128)
     parser.add_argument("--map", type=str, default='MoveToBeacon')
     parser.add_argument("--cfg_path", type=str, default='config.json.dist')
@@ -37,6 +37,8 @@ if __name__ == '__main__':
     image_input_shape = np.shape(dataset.input_observations)[1:]
     actions_input_shape = np.shape(dataset.output_actions)[1:]
     output_size = actions_input_shape[0]
+    
+    rollouts = [dataset.input_observations, [dataset.output_actions, dataset.output_params]]
 
     with open('replays/%s.pkl' % config.map_id(), 'rb') as fl:
         rollouts = pickle.load(fl)
