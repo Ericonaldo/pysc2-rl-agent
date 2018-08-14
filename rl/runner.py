@@ -34,8 +34,7 @@ class Runner:
             action, values[step] = self.agent.act(self.state)
             states[step], actions[step] = self.state, action
             self.state, rewards[step], dones[step] = self.envs.step(action)
-            dones[step] = (dones[step].astype(int) | dones[step-1].astype(int)).astype(float) # 已经结束的就不再继续
-
+            #dones[step] = (dones[step].astype(int) | dones[step-1].astype(int)).astype(float) # 已经结束的就不再继续
             self.log(rewards[step], dones[step]) # 存储本次训练的n_step中的reward的信息，一个reward[step]包含envs.num_envs个元素
 
         last_value = self.agent.get_value(self.state)
