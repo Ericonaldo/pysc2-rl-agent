@@ -236,7 +236,8 @@ def run_thread(agent_cls, map_name, visualize):
 if __name__ == "__main__":
     """Run an agent."""
     FLAGS(sys.argv)
-    FLAGS.max_agent_steps = DATA_SIZE = FLAGS.DATA_SIZE
+    FLAGS.max_agent_steps = FLAGS.DATA_SIZE+1
+    DATA_SIZE = FLAGS.DATA_SIZE
     print("-------------------")
     stopwatch.sw.enabled = FLAGS.profile or FLAGS.trace
     stopwatch.sw.trace = FLAGS.trace
