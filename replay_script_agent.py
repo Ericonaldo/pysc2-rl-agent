@@ -89,17 +89,17 @@ class MoveToBeacon(base_agent.BaseAgent):
       neutral_y, neutral_x = (player_relative == _PLAYER_NEUTRAL).nonzero()
       if not neutral_y.any():
         self.action = _NO_OP # 动作函数id
-        # param = []
+        param = []
       # target = [int(neutral_x.mean()), int(neutral_y.mean())]
-      target = int(neutral_x.mean()) * self.config.self.config.sz + int(neutral_y.mean())
+      target = int(neutral_x.mean()) * self.config.sz + int(neutral_y.mean())
       self.action = _MOVE_SCREEN # 动作函数id
       self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_NOT_QUEUED]
       self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = [target] # 函数参数
-      # param = [_NOT_QUEUED, target]
+      param = [_NOT_QUEUED, target]
     else:
       self.action = _SELECT_ARMY # 动作函数id
-      self.param[self.config.arg_idx[FUNCTIONS[act].args[0].name]] = [_SELECT_ALL] # 函数参数
-      # param = [_SELECT_ALL]
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_SELECT_ALL] # 函数参数
+      param = [_SELECT_ALL]
             
     self.states.append(np.array([obs.observation, self.action, self.param]))
 
@@ -108,7 +108,7 @@ class MoveToBeacon(base_agent.BaseAgent):
       np.save("dataset_{}/{}".format(self.__class__.__name__, new_file_name), np.array(self.states))
       self.states = []
       
-    return actions.FunctionCall(self.action, self.param)
+    return actions.FunctionCall(self.action, param)
 
 
 class CollectMineralShards(base_agent.BaseAgent):
@@ -129,22 +129,22 @@ class CollectMineralShards(base_agent.BaseAgent):
       player_y, player_x = (player_relative == _PLAYER_FRIENDLY).nonzero()
       if not neutral_y.any() or not player_y.any():
         self.action = _NO_OP # 动作函数id
-        # self.param = []
+        param = []
       player = [int(player_x.mean()), int(player_y.mean())]
-      # player = int(player_x.mean()) * self.config.self.config.sz + int(player_y.mean())
+      # player = int(player_x.mean()) * self.config.sz + int(player_y.mean())
       closest, min_dist = None, None
       for p in zip(neutral_x, neutral_y):
         dist = np.linalg.norm(np.array(player) - np.array(p))
         if not min_dist or dist < min_dist:
           closest, min_dist = p, dist
       self.action = _MOVE_SCREEN # 动作函数id
-      # param = [_NOT_QUEUED, closest]
+      param = [_NOT_QUEUED, closest]
       self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_NOT_QUEUED]
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = [closest[0] * config.self.config.sz +closest[1]]
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = [closest[0] * self.config.sz +closest[1]]
     else:
       self.action = _SELECT_ARMY # 动作函数id
       self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_SELECT_ALL]
-      # param = [_SELECT_ALL]
+      param = [_SELECT_ALL]
       
     self.states.append(np.array([obs.observation, self.action, self.param]))
 
@@ -153,7 +153,7 @@ class CollectMineralShards(base_agent.BaseAgent):
       np.save("dataset_{}/{}".format(self.__class__.__name__, new_file_name), np.array(self.states))
       self.states = []
       
-    return actions.FunctionCall(self.action, self.param)
+    return actions.FunctionCall(self.action, param)
 
 
 class DefeatRoaches(base_agent.BaseAgent):
@@ -174,21 +174,21 @@ class DefeatRoaches(base_agent.BaseAgent):
       roach_y, roach_x = (player_relative == _PLAYER_HOSTILE).nonzero()
       if not roach_y.any():
         self.action = _NO_OP
-        # param = []
+        param = []
       index = np.argmax(roach_y)
       # target = [roach_x[index], roach_y[index]]
       target = roach_x[index]*self.config.sz + roach_y[index]
       self.action = _ATTACK_SCREEN
-      # param [_NOT_QUEUED, target]
+      param [_NOT_QUEUED, target]
       self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_NOT_QUEUED]
       self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = [target] # 函数参数
     elif _SELECT_ARMY in obs.observation["available_actions"]:
       self.action = _SELECT_ARMY
       self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_SELECT_ALL]
-      # param = [_SELECT_ALL]
+      param = [_SELECT_ALL]
     else:
       self.action = _NO_OP,
-      # param = []
+      param = []
       
     self.states.append(np.array([obs.observation, self.action, self.param]))
 
@@ -197,7 +197,7 @@ class DefeatRoaches(base_agent.BaseAgent):
       np.save("dataset_{}/{}".format(self.__class__.__name__, new_file_name), np.array(self.states))
       self.states = []
       
-    return actions.FunctionCall(self.action, self.param)
+    return actions.FunctionCall(self.action, param)
     
 
 def run_thread(agent_cls, map_name, visualize):
