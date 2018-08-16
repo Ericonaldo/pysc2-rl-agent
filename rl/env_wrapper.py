@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pysc2.lib.actions import FunctionCall, FUNCTIONS
 from common.config import DEFAULT_ARGS, is_spatial
 

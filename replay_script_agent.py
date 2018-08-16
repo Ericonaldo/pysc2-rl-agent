@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # __author__ = 'Tony Beltramelli - www.tonybeltramelli.com' + 'inorry'
 # __modify__ = 'eric'
 # scripted agents taken from PySC2, credits to DeepMind
@@ -52,7 +53,7 @@ flags.DEFINE_integer("screen_resolution", 84,
 flags.DEFINE_integer("minimap_resolution", 64,
                      "Resolution for minimap feature layers.")
 
-flags.DEFINE_integer("max_agent_steps", 2500, "Total agent steps.")
+flags.DEFINE_integer("max_agent_steps", DATA_SIZE, "Total agent steps.")
 flags.DEFINE_integer("game_steps_per_episode", 0, "Game steps per episode.")
 flags.DEFINE_integer("step_mul", 8, "Game steps per agent step.")
 
@@ -67,7 +68,7 @@ flags.DEFINE_bool("profile", False, "Whether to turn on code profiling.")
 flags.DEFINE_bool("trace", False, "Whether to trace the code execution.")
 flags.DEFINE_integer("parallel", 1, "How many instances to run in parallel.")
 
-flags.DEFINE_bool("save_replay", True, "Whether to save a replay at the end.")
+flags.DEFINE_bool("save_replay", False, "Whether to save a replay at the end.")
 
 flags.DEFINE_string("map", None, "Name of a map to use.")
 flags.mark_flag_as_required("map")
@@ -76,6 +77,7 @@ class MoveToBeacon(base_agent.BaseAgent):
   """An agent specifically for solving the MoveToBeacon map."""
   def __init__(self, config):
     base_agent.BaseAgent.__init__(self)
+    self.name = self.__class__.__name__
     self.states = []
     self.action = 0
     self.param = []
@@ -105,7 +107,7 @@ class MoveToBeacon(base_agent.BaseAgent):
 
     if len(self.states) == DATA_SIZE:
       new_file_name = str(uuid.uuid1())
-      np.save("dataset_{}/{}".format(self.__class__.__name__, new_file_name), np.array(self.states))
+      np.save('replay/' + config.full_id() +'/{}'.format( new_file_name), np.array(self.states))
       self.states = []
       
     return actions.FunctionCall(self.action, param)
@@ -115,6 +117,7 @@ class CollectMineralShards(base_agent.BaseAgent):
   """An agent specifically for solving the CollectMineralShards map."""
   def __init__(self, config):
     base_agent.BaseAgent.__init__(self)
+    self.name = self.__class__.__name__
     self.states = []
     self.action = 0
     self.param = []
@@ -150,7 +153,7 @@ class CollectMineralShards(base_agent.BaseAgent):
 
     if len(self.states) == DATA_SIZE:
       new_file_name = str(uuid.uuid1())
-      np.save("dataset_{}/{}".format(self.__class__.__name__, new_file_name), np.array(self.states))
+      np.save('replay/' + config.full_id() +'/{}'.format( new_file_name), np.array(self.states))
       self.states = []
       
     return actions.FunctionCall(self.action, param)
@@ -165,8 +168,8 @@ class DefeatRoaches(base_agent.BaseAgent):
     self.action = 0
     self.param = []
     self.config = config
-    for arg in actions.TYPES._fields:
-       self.param.append([DEFAULT_ARGS[arg]])  
+    for arg in actions.TYPES._fields: # 动作函数中所有的参数
+       self.param.append([DEFAULT_ARGS[arg]])  # 把其置为默认参数
   def step(self, obs):
     super(DefeatRoaches, self).step(obs)
     if _ATTACK_SCREEN in obs.observation["available_actions"]:
@@ -179,7 +182,7 @@ class DefeatRoaches(base_agent.BaseAgent):
       # target = [roach_x[index], roach_y[index]]
       target = roach_x[index]*self.config.sz + roach_y[index]
       self.action = _ATTACK_SCREEN
-      param [_NOT_QUEUED, target]
+      param = [_NOT_QUEUED, target]
       self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_NOT_QUEUED]
       self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = [target] # 函数参数
     elif _SELECT_ARMY in obs.observation["available_actions"]:
@@ -194,7 +197,7 @@ class DefeatRoaches(base_agent.BaseAgent):
 
     if len(self.states) == DATA_SIZE:
       new_file_name = str(uuid.uuid1())
-      np.save("dataset_{}/{}".format(self.__class__.__name__, new_file_name), np.array(self.states))
+      np.save('replay/' + config.full_id() +'/{}'.format( new_file_name), np.array(self.states))
       self.states = []
       
     return actions.FunctionCall(self.action, param)
@@ -214,8 +217,8 @@ def run_thread(agent_cls, map_name, visualize):
         env = available_actions_printer.AvailableActionsPrinter(env)
         agent = agent_cls
         run_loop.run_loop([agent], env, FLAGS.max_agent_steps)
-        if FLAGS.save_replay:
-            env.save_replay(agent_cls.__name__)
+        #if FLAGS.save_replay:
+        #    env.save_replay(agent_cls.name)
 
 if __name__ == "__main__":
     """Run an agent."""
@@ -227,6 +230,7 @@ if __name__ == "__main__":
 
     config = Config(FLAGS.sz, FLAGS.map, -1) # 进行参数的设置
     os.makedirs('script_weights/' + config.full_id(), exist_ok=True)
+    os.makedirs('replay/' + config.full_id(), exist_ok=True)
     cfg_path = 'script_weights/%s/config.json' % config.full_id() # 保存参数的位置
     config.build('config.json.dist') # 建立和设置参数
     config.save(cfg_path)

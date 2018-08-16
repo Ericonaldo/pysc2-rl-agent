@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os, argparse, pickle
 import numpy as np
 import tensorflow as tf
@@ -13,15 +14,15 @@ class ILAgent:
     def __init__(self, sess, model_fn, config, lr, clip_grads=1.):
         self.sess, self.config, self.lr = sess, config, lr
         (self.policy, self.value), self.inputs = model_fn(config) # self.inputs = [screen_input, minimap_input] + non_spatial_inputs
-        self.actions = [tf.placeholder(tf.int32, [None]) for _ in self.policy] # 输入的action是值形式，不是one_hot
+        self.actions = [tf.placeholder(tf.int32, [None,len(self.config.policy_dims())]) for _ in self.policy] # 输入的action是值形式，不是one_hot
 
         loss_fn, self.loss_inputs = self._loss_func()
         
         with tf.variable_scope('loss'):
             acts=[]
-            for i, (d, is_spatial) in enumerate(self.config.policy_dims())]:
+            for i, (d, is_spatial) in enumerate(self.config.policy_dims()):
                 if is_spatial:
-                    acts.append(tf.one_hot(self.actiions[i], config.sz * config.sz))
+                    acts.append(tf.one_hot(self.actions[i], config.sz * config.sz))
                 else:
                     acts.append(tf.one_hot(self.actions[i], d))    
             ce = sum([-tf.reduce_sum(a * clip_log(p), axis=-1) for a, p in zip(acts, self.policy)])

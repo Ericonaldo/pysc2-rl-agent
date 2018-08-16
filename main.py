@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os, argparse
 from absl import flags
 import tensorflow as tf
