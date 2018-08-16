@@ -18,6 +18,7 @@ if __name__ == '__main__':
     parser.add_argument("--sz", type=int, default=32)
     parser.add_argument('--lr', type=float, default=7e-4)
     # parser.add_argument('--samples', type=int, default=10)
+    parser.add_argument('--epochs', type=int, default=10000)
     parser.add_argument('--batch_sz', type=int, default=128)
     parser.add_argument("--map", type=str, default='MoveToBeacon')
     parser.add_argument("--cfg_path", type=str, default='config.json.dist')
@@ -34,11 +35,11 @@ if __name__ == '__main__':
     config.save(cfg_path)
     
     dataset = Dataset()
-    samples = dataset.load("replay/"+config.full_id())
+    dataset.load("replay/"+config.full_id())
 
     inputs = config.preprocess(dataset.input_observations)
     outputs = dataset.output_actions.transpose()
-    print(outputs.shape)
+    
     rollouts = [inputs, outputs]
 
     # with open('replays/%s.pkl' % config.map_id(), 'rb') as fl:
@@ -52,13 +53,15 @@ if __name__ == '__main__':
     # for i in rollouts[0]:
     #    print(np.shape(i))
 
-    n = len(rollouts[0][0])
-    epochs = max(1, samples // n)
-    n_batches = min(samples, n) // args.batch_sz + 1
-    print("n_samples: %d, epochs: %d, batches: %d" % (n, epochs, n_batches))
-    for _ in range(epochs):
+    n_samples = len(rollouts[0][0])
+    epochs = args.epochs
+    # epochs = max(1, samples // n)
+    n_batches = n_samples // args.batch_sz + 1
+    print("n_samples: %d, epochs: %d, batches: %d" % (n_samples, epochs, n_batches))
+    for e in range(epochs):
+        print("epoch {}".format(e))
         for _ in range(n_batches):
-            idx = np.random.choice(n, args.batch_sz, replace=False)
+            idx = np.random.choice(n_samples, args.batch_sz, replace=False)
             sample = [s[idx] for s in rollouts[0]], [a[idx] for a in rollouts[1]]
             #print(sample)
             res = agent.train(*sample)

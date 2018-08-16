@@ -236,14 +236,13 @@ def run_thread(agent_cls, map_name, visualize):
 if __name__ == "__main__":
     """Run an agent."""
     FLAGS(sys.argv)
-    DATA_SIZE = FLAGS.DATA_SIZE
+    FLAGS.max_agent_steps = DATA_SIZE = FLAGS.DATA_SIZE
     print("-------------------")
     stopwatch.sw.enabled = FLAGS.profile or FLAGS.trace
     stopwatch.sw.trace = FLAGS.trace
     
     maps.get(FLAGS.map)  # Assert the map exists.
     FLAGS.screen_resolution = FLAGS.minimap_resolution = FLAGS.sz # 强制让screen和minimap的大小都为sz
-
     config = Config(FLAGS.sz, FLAGS.map, -1) # 进行参数的设置
     os.makedirs('script_weights/' + config.full_id(), exist_ok=True)
     os.makedirs('replay/' + config.full_id(), exist_ok=True)

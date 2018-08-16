@@ -17,11 +17,9 @@ class Dataset:
 
     def load(self, path):
         print("Loading data...")
-        sample = 0
         for f in os.listdir(path):
             if f.find(".replay") != -1:
                 file_name = f[:f.find(".replay")]
-                sample += int(file_name[-2]+file_name[-1])
                 #states = np.load("{}/{}.npy".format(path, file_name))
                 states = pickle.load(open("{}/{}.replay".format(path, file_name), 'rb'))
                 for results,action,param in states:
@@ -57,4 +55,3 @@ class Dataset:
         print("output actions: ", np.shape(self.output_actions))
         # print("output params: ", np.shape(self.output_params))
         
-        return sample
