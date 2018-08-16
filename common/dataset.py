@@ -36,20 +36,20 @@ class Dataset:
                     # output_action[action] = 1.0 # one_hot action
                     self.input_observations.append(results)
 
-                    self.output_actions.append(action)
+                    self.output_actions.append([action]+param)
 
-                    self.output_params.append(param)
+                    # self.output_params.append(param)
 
                 # print(self.output_params)
 
-        assert len(self.input_observations) == len(self.output_actions) == len(self.output_params)
+        assert len(self.input_observations) == len(self.output_actions)# == len(self.output_params)
 
-        # self.input_observations = np.array(self.input_observations)
+        # self.input_observations = np.array(self.input_observations) # dictionary
         # self.input_available_actions = np.array(self.input_available_actions)
         self.output_actions = np.array(self.output_actions)
-        self.output_params = np.array(self.output_params)
+        # self.output_params = np.array(self.output_params)
 
         print("input observations: ", np.shape(self.input_observations))
         # print("input available actions ", np.shape(self.input_available_actions))
         print("output actions: ", np.shape(self.output_actions))
-        print("output params: ", np.shape(self.output_params))
+        # print("output params: ", np.shape(self.output_params))

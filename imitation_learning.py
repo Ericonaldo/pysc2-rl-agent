@@ -35,31 +35,27 @@ if __name__ == '__main__':
     
     dataset = Dataset()
     dataset.load("replay/"+config.full_id())
-    # image_input_shape = np.shape(dataset.input_observations)[1:]
-    # actions_input_shape = np.shape(dataset.output_actions)[1:]
-    # output_size = actions_input_shape[0]
     
-    rollouts = [dataset.input_observations, [dataset.output_actions, dataset.output_params]]
+    rollouts = [dataset.input_observations, dataset.output_actions]
 
     # with open('replays/%s.pkl' % config.map_id(), 'rb') as fl:
     #    rollouts = pickle.load(fl)
-    for i in range(2):
-        for j in range(len(rollouts[i])):
-            rollouts[i][j] = np.array(rollouts[i][j])
+    # for i in range(2):
+    #    for j in range(len(rollouts[i])):
+    #        rollouts[i][j] = np.array(rollouts[i][j])
 
     agent = ILAgent(sess, fully_conv, config, args.lr)
-    
-    # print(dataset.input_observations)
 
-    n = len(rollouts[0][0])
+    # print(len(rollouts[0]))
+
+    n = len(rollouts[0])
     epochs = max(1, args.samples // n)
     n_batches = min(args.samples, n) // args.batch_sz + 1
-    print("n_samples %d, epochs: %d, batches: %d" % (n, epochs, n_batches))
+    print("n_samples: %d, epochs: %d, batches: %d" % (n, epochs, n_batches))
     for _ in range(epochs):
         for _ in range(n_batches):
-            print("n:",n)
             idx = np.random.choice(n, args.batch_sz, replace=False)
-            sample = [s[idx] for s in rollouts[0]], [a[idx] for a in rollouts[1]]
+            sample = [rollouts[0][i] for i in idx], [rollouts[1][i] for i in idx]
             res = agent.train(*sample)
             print(res)
     agent.saver.save(sess, 'weights/%s/a2c' % config.full_id(), global_step=agent.step)
