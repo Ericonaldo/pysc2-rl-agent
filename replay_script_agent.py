@@ -50,6 +50,8 @@ FLAGS = flags.FLAGS
 flags.DEFINE_bool("render", True, "Whether to render with pygame.")
 flags.DEFINE_integer("sz", 32,
                      "Resolutions.")
+flags.DEFINE_integer("DATA_SIZE", 10000,
+                     "Resolutions.")
 flags.DEFINE_integer("screen_resolution", 84,
                      "Resolution for screen feature layers.")
 flags.DEFINE_integer("minimap_resolution", 64,
@@ -231,7 +233,7 @@ def run_thread(agent_cls, map_name, visualize):
 if __name__ == "__main__":
     """Run an agent."""
     FLAGS(sys.argv)
-    
+    DATA_SIZE = FLAGS.DATA_SIZE
     print("-------------------")
     stopwatch.sw.enabled = FLAGS.profile or FLAGS.trace
     stopwatch.sw.trace = FLAGS.trace
