@@ -44,7 +44,7 @@ _SELECT_ARMY = actions.FUNCTIONS.select_army.id
 _NOT_QUEUED = 0
 _SELECT_ALL = 0
 
-DATA_SIZE = 1000
+DATA_SIZE = 10
 
 FLAGS = flags.FLAGS
 flags.DEFINE_bool("render", True, "Whether to render with pygame.")
@@ -236,6 +236,7 @@ if __name__ == "__main__":
     stopwatch.sw.trace = FLAGS.trace
     
     maps.get(FLAGS.map)  # Assert the map exists.
+    FLAGS.screen_resolution = FLAGS.minimap_resolution = FLAGS.sz # 强制让screen和minimap的大小都为sz
 
     config = Config(FLAGS.sz, FLAGS.map, -1) # 进行参数的设置
     os.makedirs('script_weights/' + config.full_id(), exist_ok=True)

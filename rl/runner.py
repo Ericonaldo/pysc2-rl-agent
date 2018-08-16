@@ -38,6 +38,7 @@ class Runner:
             action, values[step] = self.agent.act(self.state)
             states[step], actions[step] = self.state, action
             self.state, rewards[step], dones[step] = self.envs.step(action)
+
             #dones[step] = (dones[step].astype(int) | dones[step-1].astype(int)).astype(float) # 已经结束的就不再继续
             self.log(rewards[step], dones[step]) # 存储本次训练的n_step中的reward的信息，一个reward[step]包含envs.num_envs个元素
 
@@ -46,7 +47,7 @@ class Runner:
         return flatten_lists(states), flatten_lists(actions), rewards, dones, last_value, self.ep_rews
 
     def reset(self):
-        self.state, _ = self.envs.reset()
+        self.state, *_ = self.envs.reset()
         self.logs = {'updates': 0, 'eps': 0, 'rew_best': 0, 'start_time': time.time(),
                      'ep_rew': np.zeros(self.envs.num_envs), 'dones': np.zeros(self.envs.num_envs)}
 

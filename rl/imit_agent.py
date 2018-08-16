@@ -42,6 +42,10 @@ class ILAgent:
         self.summary_writer = tf.summary.FileWriter('il_logs/' + self.config.full_id(), graph=None)
 
     def train(self, states, actions):
+        print(len(states))
+        for i in states:
+            print(i.shape)
+        print(actions.shape)
         feed_dict = {self.inputs: states, self.actions: actions}
         result, result_summary, step = self.sess.run([self.train_op, self.summary_op, self.step], feed_dict)
 

@@ -17,8 +17,8 @@ if __name__ == '__main__':
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument("--sz", type=int, default=32)
     parser.add_argument('--lr', type=float, default=7e-4)
-    parser.add_argument('--samples', type=int, default=100000)
-    parser.add_argument('--batch_sz', type=int, default=64)
+    # parser.add_argument('--samples', type=int, default=10)
+    parser.add_argument('--batch_sz', type=int, default=4)
     parser.add_argument("--map", type=str, default='MoveToBeacon')
     parser.add_argument("--cfg_path", type=str, default='config.json.dist')
     args = parser.parse_args()
@@ -34,9 +34,12 @@ if __name__ == '__main__':
     config.save(cfg_path)
     
     dataset = Dataset()
-    dataset.load("replay/"+config.full_id())
+    samples = dataset.load("replay/"+config.full_id())
+
+    inputs = config.preprocess(dataset.input_observations)
+    outputs = dataset.output_actions
     
-    rollouts = [dataset.input_observations, dataset.output_actions]
+    rollouts = [inputs, outputs]
 
     # with open('replays/%s.pkl' % config.map_id(), 'rb') as fl:
     #    rollouts = pickle.load(fl)
@@ -46,16 +49,18 @@ if __name__ == '__main__':
 
     agent = ILAgent(sess, fully_conv, config, args.lr)
 
-    # print(len(rollouts[0]))
+    # for i in rollouts[0]:
+    #    print(np.shape(i))
 
-    n = len(rollouts[0])
-    epochs = max(1, args.samples // n)
-    n_batches = min(args.samples, n) // args.batch_sz + 1
+    n = len(rollouts[0][0])
+    epochs = max(1, samples // n)
+    n_batches = min(samples, n) // args.batch_sz + 1
     print("n_samples: %d, epochs: %d, batches: %d" % (n, epochs, n_batches))
     for _ in range(epochs):
         for _ in range(n_batches):
             idx = np.random.choice(n, args.batch_sz, replace=False)
-            sample = [rollouts[0][i] for i in idx], [rollouts[1][i] for i in idx]
+            sample = [np.array(rollouts[0][0][idx]), np.array(rollouts[0][1][idx]), np.array(rollouts[0][2][idx])], np.array(rollouts[1][idx])
+            # print(len(sample[0]))
             res = agent.train(*sample)
             print(res)
     agent.saver.save(sess, 'weights/%s/a2c' % config.full_id(), global_step=agent.step)
