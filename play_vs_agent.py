@@ -54,6 +54,8 @@ from pysc2.env import run_loop
 from pysc2.env import sc2_env
 from pysc2.lib import point_flag
 from pysc2.lib import renderer_human
+from common import Config
+from rl import Runner, EnvWrapper
 
 from s2clientprotocol import sc2api_pb2 as sc_pb
 
@@ -61,6 +63,8 @@ FLAGS = flags.FLAGS
 flags.DEFINE_bool("render", platform.system() == "Linux",
                   "Whether to render with pygame.")
 flags.DEFINE_bool("realtime", False, "Whether to run in realtime mode.")
+
+flags.DEFINE_bool("sz", 32, "sz")
 
 flags.DEFINE_string("agent", "pysc2.agents.random_agent.RandomAgent",
                     "Which agent to run, as a python path to an Agent class.")
@@ -104,13 +108,18 @@ flags.DEFINE_bool("human", False, "Whether to host a game as a human.")
 
 
 def main(unused_argv):
+  config = Config(FLAGS.sz, FLAGS.map, -1) # 进行参数的设置
+  os.makedirs('weights/' + config.full_id(), exist_ok=True)
+  cfg_path = 'weights/%s/config.json' % config.full_id() # 保存参数的位置
+  config.build(cfg_path) # 建立和设置参数
+
   if FLAGS.human:
     human()
   else:
-    agent()
+    agent(config)
 
 
-def agent():
+def agent(Config config):
   """Run the agent, connecting to a (remote) host started independently."""
   agent_module, agent_name = FLAGS.agent.rsplit(".", 1)
   agent_cls = getattr(importlib.import_module(agent_module), agent_name)
@@ -129,10 +138,13 @@ def agent():
           action_space=FLAGS.action_space,
           use_feature_units=FLAGS.use_feature_units),
       visualize=FLAGS.render) as env:
+    env = EnvWrapper(env, config) # 创建环境,封装一层
     agents = [agent_cls()]
     logging.info("Connected, starting run_loop.")
     try:
-      run_loop.run_loop(agents, env)
+      # run_loop.run_loop(agents, env)
+      runner = Runner(envs, agent, args.steps) # 创建进程
+      runner.run(args.updates, False) # 开始运行
     except lan_sc2_env.RestartException:
       pass
   logging.info("Done.")

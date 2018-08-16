@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import time
 import numpy as np
 from baselines import logger
@@ -6,19 +7,22 @@ from common import flatten_lists
 # 仿照run_loop，实现环境与agent的交互
 
 class Runner:
-    def __init__(self, envs, agent, n_steps=8): # n_step表示经过多少步训练一次
+    def __init__(self, envs, agent, n_steps=1): # n_step表示经过多少步训练一次
         self.state = self.logs = self.ep_rews = None
         self.agent, self.envs, self.n_steps = agent, envs, n_steps
 
-    def run(self, num_updates=1, train=True):
+    def run(self, num_updates=1, train=True, vs=False):
         # based on https://github.com/deepmind/pysc2/blob/master/pysc2/env/run_loop.py
         self.reset()
         try:
-            for i in range(num_updates):
-                self.logs['updates'] += 1
-                rollout = self.collect_rollout() # 交互并收集训练数据
-                if train:
-                    self.agent.train(i, *rollout) # 训练
+            if vs:
+                rollout = self.collect_rollout() # 交互并收集数据
+            else:
+                for i in range(num_updates):
+                    self.logs['updates'] += 1
+                    rollout = self.collect_rollout() # 交互并收集训练数据
+                    if train:
+                        self.agent.train(i, *rollout) # 训练
         except KeyboardInterrupt:
             pass
         finally:

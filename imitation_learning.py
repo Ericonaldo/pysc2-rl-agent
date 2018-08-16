@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os, argparse, pickle
 import numpy as np
 import tensorflow as tf
@@ -26,22 +27,22 @@ if __name__ == '__main__':
     tf.reset_default_graph()
     sess = tf.Session()
 
-    config = Config(args.sz, args.map, "il")
+    config = Config(args.sz, args.map, -1)
     os.makedirs('weights/' + config.full_id(), exist_ok=True)
     cfg_path = 'weights/%s/config.json' % config.full_id()
     config.build(args.cfg_path)
     config.save(cfg_path)
     
     dataset = Dataset()
-    dataset.load("dataset_{}".format(name))
+    dataset.load("replay/{}"+config.full_id())
     image_input_shape = np.shape(dataset.input_observations)[1:]
     actions_input_shape = np.shape(dataset.output_actions)[1:]
     output_size = actions_input_shape[0]
     
     rollouts = [dataset.input_observations, [dataset.output_actions, dataset.output_params]]
 
-    with open('replays/%s.pkl' % config.map_id(), 'rb') as fl:
-        rollouts = pickle.load(fl)
+    # with open('replays/%s.pkl' % config.map_id(), 'rb') as fl:
+    #    rollouts = pickle.load(fl)
     for i in range(2):
         for j in range(len(rollouts[i])):
             rollouts[i][j] = np.array(rollouts[i][j])

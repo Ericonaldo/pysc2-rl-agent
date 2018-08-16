@@ -4,6 +4,7 @@ import os
 import numpy as np
 
 from pysc2.lib import actions
+from common.config import *
 
 
 class Dataset:
@@ -20,29 +21,28 @@ class Dataset:
                 file_name = f[:f.find(".npy")]
                 states = np.load("{}/{}.npy".format(path, file_name))
 
-                for state in states:
-                    self.input_observations.append(state[0]) # observations
+                for results,action,param in states:
+                    obs = [res.observation for res in results] 
+                    rewards = [res.reward for res in results]
+                    dones = [res.last() for res in results]
+
+                    self.input_observations.append(obs) # observations
 
                     output_size = len(actions.FUNCTIONS)
                     output_action = np.zeros(output_size)
-                    output_action[state[1]] = 1.0
+                    output_action[action] = 1.0
                     self.output_actions.append(output_action) # one_hot action
 
-                    if np.shape(state[2]) == (2,): 
-                        image_size = np.shape(state[0])[0]
-                        point = [float(state[2][1][0]) / image_size, float(state[2][1][1]) / image_size] # state[2][1] 为target
-                        self.output_params.append(point)
-                    else:
-                        self.output_params.append([0, 0])
+                    self.output_params.append(param)
 
         assert len(self.input_observations) == len(self.input_available_actions) == len(self.output_actions) == len(self.output_params)
 
         self.input_observations = np.array(self.input_observations)
-        self.input_available_actions = np.array(self.input_available_actions)
+        #self.input_available_actions = np.array(self.input_available_actions)
         self.output_actions = np.array(self.output_actions)
         self.output_params = np.array(self.output_params)
 
-        print "input observations: ", np.shape(self.input_observations)
-        print "input available actions ", np.shape(self.input_available_actions)
-        print "output actions: ", np.shape(self.output_actions)
-        print "output params: ", np.shape(self.output_params)
+        print("input observations: ", np.shape(self.input_observations))
+        # print("input available actions ", np.shape(self.input_available_actions))
+        print("output actions: ", np.shape(self.output_actions))
+        print("output params: ", np.shape(self.output_params))
