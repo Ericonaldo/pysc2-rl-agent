@@ -15,16 +15,16 @@ class Dataset:
         self.output_params = []
 
     def load(self, path):
-        print "Loading data..."
+        print("Loading data...")
         for f in os.listdir(path):
             if f.find(".npy") != -1:
                 file_name = f[:f.find(".npy")]
                 states = np.load("{}/{}.npy".format(path, file_name))
 
                 for results,action,param in states:
-                    obs = [res.observation for res in results] 
-                    rewards = [res.reward for res in results]
-                    dones = [res.last() for res in results]
+                    obs = [res for res in results] 
+                    # rewards = [res.reward for res in results]
+                    # dones = [res.last() for res in results]
 
                     self.input_observations.append(obs) # observations
 
@@ -35,10 +35,10 @@ class Dataset:
 
                     self.output_params.append(param)
 
-        assert len(self.input_observations) == len(self.input_available_actions) == len(self.output_actions) == len(self.output_params)
+        assert len(self.input_observations) == len(self.output_actions) == len(self.output_params)
 
         self.input_observations = np.array(self.input_observations)
-        #self.input_available_actions = np.array(self.input_available_actions)
+        # self.input_available_actions = np.array(self.input_available_actions)
         self.output_actions = np.array(self.output_actions)
         self.output_params = np.array(self.output_params)
 

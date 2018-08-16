@@ -34,7 +34,7 @@ if __name__ == '__main__':
     config.save(cfg_path)
     
     dataset = Dataset()
-    dataset.load("replay/{}"+config.full_id())
+    dataset.load("replay/"+config.full_id())
     image_input_shape = np.shape(dataset.input_observations)[1:]
     actions_input_shape = np.shape(dataset.output_actions)[1:]
     output_size = actions_input_shape[0]

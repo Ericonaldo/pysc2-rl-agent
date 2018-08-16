@@ -16,8 +16,6 @@ class ILAgent:
         (self.policy, self.value), self.inputs = model_fn(config) # self.inputs = [screen_input, minimap_input] + non_spatial_inputs
         self.actions = [tf.placeholder(tf.int32, [None,len(self.config.policy_dims())]) for _ in self.policy] # 输入的action是值形式，不是one_hot
 
-        loss_fn, self.loss_inputs = self._loss_func()
-        
         with tf.variable_scope('loss'):
             acts=[]
             for i, (d, is_spatial) in enumerate(self.config.policy_dims()):
@@ -29,13 +27,13 @@ class ILAgent:
             ce_loss = tf.reduce_mean(ce)
             val_loss = 0 * tf.reduce_mean(self.value) # hack to match a2c agent computational graph
             self.loss = ce_loss + val_loss
-            tf.summary.scalar('loss', loss)
+            tf.summary.scalar('loss', self.loss)
         
         with tf.variable_scope('train'):
             self.step = tf.Variable(0, trainable=False)
             opt = tf.train.AdamOptimizer(learning_rate=lr, epsilon=1e-5)
             # opt = tf.train.RMSPropOptimizer(learning_rate=lr, decay=0.99, epsilon=1e-5)
-            self.train_op = layers.optimize_loss(loss=loss, optimizer=opt, learning_rate=None, global_step=self.step, clip_gradients=clip_grads)
+            self.train_op = layers.optimize_loss(loss=self.loss, optimizer=opt, learning_rate=None, global_step=self.step, clip_gradients=clip_grads)
             self.sess.run(tf.global_variables_initializer())     
 
         self.saver = tf.train.Saver()
