@@ -38,7 +38,6 @@ class Dataset:
                     # output_action[action] = 1.0 # one_hot action
                     
                     self.input_observations.append(results)
-                    print(param)
 
                     self.output_actions.append([action]+param)
 

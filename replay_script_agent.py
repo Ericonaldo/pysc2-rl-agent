@@ -44,7 +44,7 @@ _SELECT_ARMY = actions.FUNCTIONS.select_army.id
 _NOT_QUEUED = 0
 _SELECT_ALL = 0
 
-DATA_SIZE = 10
+DATA_SIZE = 10000
 
 FLAGS = flags.FLAGS
 flags.DEFINE_bool("render", True, "Whether to render with pygame.")

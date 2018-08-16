@@ -18,7 +18,7 @@ if __name__ == '__main__':
     parser.add_argument("--sz", type=int, default=32)
     parser.add_argument('--lr', type=float, default=7e-4)
     # parser.add_argument('--samples', type=int, default=10)
-    parser.add_argument('--batch_sz', type=int, default=4)
+    parser.add_argument('--batch_sz', type=int, default=128)
     parser.add_argument("--map", type=str, default='MoveToBeacon')
     parser.add_argument("--cfg_path", type=str, default='config.json.dist')
     args = parser.parse_args()
@@ -37,8 +37,8 @@ if __name__ == '__main__':
     samples = dataset.load("replay/"+config.full_id())
 
     inputs = config.preprocess(dataset.input_observations)
-    outputs = dataset.output_actions
-    
+    outputs = dataset.output_actions.transpose()
+    print(outputs.shape)
     rollouts = [inputs, outputs]
 
     # with open('replays/%s.pkl' % config.map_id(), 'rb') as fl:
@@ -60,7 +60,7 @@ if __name__ == '__main__':
         for _ in range(n_batches):
             idx = np.random.choice(n, args.batch_sz, replace=False)
             sample = [s[idx] for s in rollouts[0]], [a[idx] for a in rollouts[1]]
-            # print(len(sample[0]))
+            #print(sample)
             res = agent.train(*sample)
             print(res)
     agent.saver.save(sess, 'weights/%s/a2c' % config.full_id(), global_step=agent.step)

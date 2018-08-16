@@ -15,6 +15,8 @@ class ILAgent:
         self.sess, self.config, self.lr = sess, config, lr
         (self.policy, self.value), self.inputs = model_fn(config) # self.inputs = [screen_input, minimap_input] + non_spatial_inputs
         self.actions = [tf.placeholder(tf.int32, [None]) for _ in range(len(self.policy))] # policy is a list, actions is a list  每个元素对应动作函数或参数
+        #print(self.inputs)
+        #print(self.actions)
 
         with tf.variable_scope('loss'):
             acts=[]
@@ -31,8 +33,8 @@ class ILAgent:
         
         with tf.variable_scope('train'):
             self.step = tf.Variable(0, trainable=False)
-            opt = tf.train.AdamOptimizer(learning_rate=lr, epsilon=1e-5)
-            # opt = tf.train.RMSPropOptimizer(learning_rate=lr, decay=0.99, epsilon=1e-5)
+            # opt = tf.train.AdamOptimizer(learning_rate=lr, epsilon=1e-5)
+            opt = tf.train.RMSPropOptimizer(learning_rate=lr, decay=0.99, epsilon=1e-5)
             self.train_op = layers.optimize_loss(loss=self.loss, optimizer=opt, learning_rate=None, global_step=self.step, clip_gradients=clip_grads)
             self.sess.run(tf.global_variables_initializer())     
 
@@ -45,7 +47,7 @@ class ILAgent:
         # print(len(states))
         # for i in states:
         #     print(i.shape)
-        # print(actions.shape)
+        # print(len(actions))
         # feed_dict = {self.inputs: states, self.actions: actions}
         feed_dict = dict(zip(self.inputs + self.actions, states + actions))
         result, result_summary, step = self.sess.run([self.train_op, self.summary_op, self.step], feed_dict)
