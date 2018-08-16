@@ -42,7 +42,7 @@ class Runner:
         return flatten_lists(states), flatten_lists(actions), rewards, dones, last_value, self.ep_rews
 
     def reset(self):
-        self.state, *_ = self.envs.reset()
+        self.state, _ = self.envs.reset()
         self.logs = {'updates': 0, 'eps': 0, 'rew_best': 0, 'start_time': time.time(),
                      'ep_rew': np.zeros(self.envs.num_envs), 'dones': np.zeros(self.envs.num_envs)}
 

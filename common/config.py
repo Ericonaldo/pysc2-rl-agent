@@ -41,8 +41,6 @@ NON_SPATIAL_FEATURES = dict(
     control_groups=(10, 2),
 )
 
-SZ = 32
-
 class Config:
     # TODO extract embed_dim_fn to config
     def __init__(self, sz, map, run_id, embed_dim_fn=lambda x: max(1, round(np.log2(x)))):
@@ -50,7 +48,6 @@ class Config:
         self.sz, self.map = sz, map
         self.embed_dim_fn = embed_dim_fn
         self.feats = self.acts = self.act_args = self.arg_idx = self.ns_idx = None
-        SZ=sz
 
     def build(self, cfg_path):
         feats, acts, act_args = self._load(cfg_path) # 加载参数，若参数不存在则保存
