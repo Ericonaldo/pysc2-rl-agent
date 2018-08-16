@@ -51,7 +51,7 @@ flags.DEFINE_bool("render", True, "Whether to render with pygame.")
 flags.DEFINE_integer("sz", 32,
                      "Resolutions.")
 flags.DEFINE_integer("DATA_SIZE", 10000,
-                     "Resolutions.")
+                     "data_size.")
 flags.DEFINE_integer("screen_resolution", 84,
                      "Resolution for screen feature layers.")
 flags.DEFINE_integer("minimap_resolution", 64,
@@ -96,12 +96,13 @@ class MoveToBeacon(base_agent.BaseAgent):
       if not neutral_y.any():
         self.action = _NO_OP # 动作函数id
         param = []
-      target_xy = [int(neutral_x.mean()), int(neutral_y.mean())]
-      target = int(neutral_x.mean()) * self.config.sz + int(neutral_y.mean())
-      self.action = _MOVE_SCREEN # 动作函数id
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _NOT_QUEUED
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = target # 函数参数
-      param = [[_NOT_QUEUED], target_xy]
+      else:
+        target_xy = [int(neutral_x.mean()), int(neutral_y.mean())]
+        target = int(neutral_x.mean()) * self.config.sz + int(neutral_y.mean())
+        self.action = _MOVE_SCREEN # 动作函数id
+        self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _NOT_QUEUED
+        self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = target # 函数参数
+        param = [[_NOT_QUEUED], target_xy]
     else:
       self.action = _SELECT_ARMY # 动作函数id
       self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _SELECT_ALL # 函数参数
@@ -140,17 +141,18 @@ class CollectMineralShards(base_agent.BaseAgent):
       if not neutral_y.any() or not player_y.any():
         self.action = _NO_OP # 动作函数id
         param = []
-      player = [int(player_x.mean()), int(player_y.mean())]
-      # player = int(player_x.mean()) * self.config.sz + int(player_y.mean())
-      closest, min_dist = None, None
-      for p in zip(neutral_x, neutral_y):
-        dist = np.linalg.norm(np.array(player) - np.array(p))
-        if not min_dist or dist < min_dist:
-          closest, min_dist = p, dist
-      self.action = _MOVE_SCREEN # 动作函数id
-      param = [[_NOT_QUEUED], closest]
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _NOT_QUEUED
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = closest[0] * self.config.sz +closest[1]
+      else:
+        player = [int(player_x.mean()), int(player_y.mean())]
+        # player = int(player_x.mean()) * self.config.sz + int(player_y.mean())
+        closest, min_dist = None, None
+        for p in zip(neutral_x, neutral_y):
+          dist = np.linalg.norm(np.array(player) - np.array(p))
+          if not min_dist or dist < min_dist:
+            closest, min_dist = p, dist
+        self.action = _MOVE_SCREEN # 动作函数id
+        param = [[_NOT_QUEUED], closest]
+        self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _NOT_QUEUED
+        self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = closest[0] * self.config.sz +closest[1]
     else:
       self.action = _SELECT_ARMY # 动作函数id
       self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _SELECT_ALL
@@ -186,13 +188,14 @@ class DefeatRoaches(base_agent.BaseAgent):
       if not roach_y.any():
         self.action = _NO_OP
         param = []
-      index = np.argmax(roach_y)
-      target_xy = [roach_x[index], roach_y[index]]
-      target = roach_x[index]*self.config.sz + roach_y[index]
-      self.action = _ATTACK_SCREEN
-      param = [[_NOT_QUEUED], target_xy]
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _NOT_QUEUED
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = target # 函数参数
+      else:
+        index = np.argmax(roach_y)
+        target_xy = [roach_x[index], roach_y[index]]
+        target = roach_x[index]*self.config.sz + roach_y[index]
+        self.action = _ATTACK_SCREEN
+        param = [[_NOT_QUEUED], target_xy]
+        self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _NOT_QUEUED
+        self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = target # 函数参数
     elif _SELECT_ARMY in obs.observation["available_actions"]:
       self.action = _SELECT_ARMY
       self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _SELECT_ALL
