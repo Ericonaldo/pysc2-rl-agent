@@ -14,7 +14,7 @@ class ILAgent:
     def __init__(self, sess, model_fn, config, lr, clip_grads=1.):
         self.sess, self.config, self.lr = sess, config, lr
         (self.policy, self.value), self.inputs = model_fn(config) # self.inputs = [screen_input, minimap_input] + non_spatial_inputs
-        self.actions = [tf.placeholder(tf.int32, [None,len(self.config.policy_dims())]) for _ in self.policy] # 输入的action是值形式，不是one_hot
+        self.actions = [tf.placeholder(tf.int32, [None]) for _ in range(len(self.policy))] # policy is a list, actions is a list  每个元素对应动作函数或参数
 
         with tf.variable_scope('loss'):
             acts=[]
@@ -42,11 +42,12 @@ class ILAgent:
         self.summary_writer = tf.summary.FileWriter('il_logs/' + self.config.full_id(), graph=None)
 
     def train(self, states, actions):
-        print(len(states))
-        for i in states:
-            print(i.shape)
-        print(actions.shape)
-        feed_dict = {self.inputs: states, self.actions: actions}
+        # print(len(states))
+        # for i in states:
+        #     print(i.shape)
+        # print(actions.shape)
+        # feed_dict = {self.inputs: states, self.actions: actions}
+        feed_dict = dict(zip(self.inputs + self.actions, states + actions))
         result, result_summary, step = self.sess.run([self.train_op, self.summary_op, self.step], feed_dict)
 
         self.summary_writer.add_summary(result_summary, step)

@@ -38,10 +38,10 @@ class A2CAgent:
 
         returns = self._compute_returns(rewards, dones, last_value)
 
-        print(len(states))
-        for i in states:
-            print(i.shape)
-        print(actions[0].shape)
+        #print(len(states))
+        #for i in states:
+        #    print(i.shape)
+        #print(len(actions))
 
         feed_dict = dict(zip(self.inputs + self.loss_inputs, states + actions + [returns])) # 你非得写成这样令人看了得转个弯才能看懂吗
         result, result_summary, step = self.sess.run([self.train_op, self.summary_op, self.step], feed_dict) # 每次训练都记录summary

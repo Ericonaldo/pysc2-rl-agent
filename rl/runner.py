@@ -36,6 +36,7 @@ class Runner:
 
         for step in range(self.n_steps):
             action, values[step] = self.agent.act(self.state)
+            # print('-----', len(action))
             states[step], actions[step] = self.state, action
             self.state, rewards[step], dones[step] = self.envs.step(action)
 

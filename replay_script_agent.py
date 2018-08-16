@@ -199,6 +199,7 @@ class DefeatRoaches(base_agent.BaseAgent):
       self.action = _NO_OP,
       param = []
       
+    
     self.states.append([copy.deepcopy(obs.observation), copy.deepcopy(self.action), copy.deepcopy(self.param)])
 
     if len(self.states) == DATA_SIZE:

@@ -59,7 +59,7 @@ if __name__ == '__main__':
     for _ in range(epochs):
         for _ in range(n_batches):
             idx = np.random.choice(n, args.batch_sz, replace=False)
-            sample = [np.array(rollouts[0][0][idx]), np.array(rollouts[0][1][idx]), np.array(rollouts[0][2][idx])], np.array(rollouts[1][idx])
+            sample = [s[idx] for s in rollouts[0]], [a[idx] for a in rollouts[1]]
             # print(len(sample[0]))
             res = agent.train(*sample)
             print(res)
