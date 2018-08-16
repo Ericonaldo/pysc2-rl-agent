@@ -10,6 +10,7 @@ from __future__ import print_function
 from future.builtins import range  # pylint: disable=redefined-builtin
 
 import numpy as np
+import pickle
 import uuid
 import sys
 import os
@@ -23,6 +24,7 @@ from pysc2.lib import stopwatch
 
 from absl import app
 from absl import flags
+import copy
 
 from pysc2.agents import base_agent
 from pysc2.lib import actions
@@ -39,8 +41,8 @@ _NO_OP = actions.FUNCTIONS.no_op.id
 _MOVE_SCREEN = actions.FUNCTIONS.Move_screen.id
 _ATTACK_SCREEN = actions.FUNCTIONS.Attack_screen.id
 _SELECT_ARMY = actions.FUNCTIONS.select_army.id
-_NOT_QUEUED = [0]
-_SELECT_ALL = [0]
+_NOT_QUEUED = 0
+_SELECT_ALL = 0
 
 DATA_SIZE = 1000
 
@@ -95,19 +97,22 @@ class MoveToBeacon(base_agent.BaseAgent):
       target_xy = [int(neutral_x.mean()), int(neutral_y.mean())]
       target = int(neutral_x.mean()) * self.config.sz + int(neutral_y.mean())
       self.action = _MOVE_SCREEN # 动作函数id
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_NOT_QUEUED]
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = [target] # 函数参数
-      param = [_NOT_QUEUED, target_xy]
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _NOT_QUEUED
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = target # 函数参数
+      param = [[_NOT_QUEUED], target_xy]
     else:
       self.action = _SELECT_ARMY # 动作函数id
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_SELECT_ALL] # 函数参数
-      param = [_SELECT_ALL]
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _SELECT_ALL # 函数参数
+      param = [[_SELECT_ALL]]
             
-    self.states.append(np.array([obs.observation, self.action, self.param]))
+    # self.states.append(np.array([obs.observation, self.action, self.param]))
+    
+    self.states.append([copy.deepcopy(obs.observation), copy.deepcopy(self.action), copy.deepcopy(self.param)])
 
     if len(self.states) == DATA_SIZE:
       new_file_name = str(uuid.uuid1())
-      np.save('replay/' + config.full_id() +'/{}'.format( new_file_name), np.array(self.states))
+      # np.save('replay/' + config.full_id() +'/{}'.format(new_file_name), np.array(self.states))
+      pickle.dump(self.states, open('replay/' + config.full_id() +'/{}'.format(new_file_name) + '_{}.replay'.format(DATA_SIZE) ,'wb'))
       self.states = []
       
     return actions.FunctionCall(self.action, param)
@@ -123,7 +128,7 @@ class CollectMineralShards(base_agent.BaseAgent):
     self.param = []
     self.config = config
     for arg in actions.TYPES._fields:
-       self.param.append(DEFAULT_ARGS[arg])   
+       self.param.append(DEFAULT_ARGS[arg])
   def step(self, obs):
     super(CollectMineralShards, self).step(obs)
     if _MOVE_SCREEN in obs.observation["available_actions"]:
@@ -141,19 +146,20 @@ class CollectMineralShards(base_agent.BaseAgent):
         if not min_dist or dist < min_dist:
           closest, min_dist = p, dist
       self.action = _MOVE_SCREEN # 动作函数id
-      param = [_NOT_QUEUED, closest]
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_NOT_QUEUED]
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = [closest[0] * self.config.sz +closest[1]]
+      param = [[_NOT_QUEUED], closest]
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _NOT_QUEUED
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = closest[0] * self.config.sz +closest[1]
     else:
       self.action = _SELECT_ARMY # 动作函数id
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_SELECT_ALL]
-      param = [_SELECT_ALL]
-      
-    self.states.append(np.array([obs.observation, self.action, self.param]))
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _SELECT_ALL
+      param = [[_SELECT_ALL]]
+
+    self.states.append([copy.deepcopy(obs.observation), copy.deepcopy(self.action), copy.deepcopy(self.param)])
 
     if len(self.states) == DATA_SIZE:
       new_file_name = str(uuid.uuid1())
-      np.save('replay/' + config.full_id() +'/{}'.format( new_file_name), np.array(self.states))
+      # np.save('replay/' + config.full_id() +'/{}'.format(new_file_name), np.array(self.states))
+      pickle.dump(self.states, open('replay/' + config.full_id() +'/{}'.format(new_file_name) + '_{}.replay'.format(DATA_SIZE) ,'wb'))
       self.states = []
       
     return actions.FunctionCall(self.action, param)
@@ -182,22 +188,23 @@ class DefeatRoaches(base_agent.BaseAgent):
       target_xy = [roach_x[index], roach_y[index]]
       target = roach_x[index]*self.config.sz + roach_y[index]
       self.action = _ATTACK_SCREEN
-      param = [_NOT_QUEUED, target_xy]
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_NOT_QUEUED]
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = [target] # 函数参数
+      param = [[_NOT_QUEUED], target_xy]
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _NOT_QUEUED
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = target # 函数参数
     elif _SELECT_ARMY in obs.observation["available_actions"]:
       self.action = _SELECT_ARMY
-      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_SELECT_ALL]
-      param = [_SELECT_ALL]
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _SELECT_ALL
+      param = [[_SELECT_ALL]]
     else:
       self.action = _NO_OP,
       param = []
       
-    self.states.append(np.array([obs.observation, self.action, self.param]))
+    self.states.append([copy.deepcopy(obs.observation), copy.deepcopy(self.action), copy.deepcopy(self.param)])
 
     if len(self.states) == DATA_SIZE:
       new_file_name = str(uuid.uuid1())
-      np.save('replay/' + config.full_id() +'/{}'.format( new_file_name), np.array(self.states))
+      # np.save('replay/' + config.full_id() +'/{}'.format(new_file_name), np.array(self.states))
+      pickle.dump(self.states, open('replay/' + config.full_id() +'/{}'.format(new_file_name) + '_{}.replay'.format(DATA_SIZE) ,'wb'))
       self.states = []
       
     return actions.FunctionCall(self.action, param)

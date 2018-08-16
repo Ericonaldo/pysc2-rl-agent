@@ -18,7 +18,7 @@ if __name__ == '__main__':
     parser.add_argument("--sz", type=int, default=32)
     parser.add_argument('--lr', type=float, default=7e-4)
     parser.add_argument('--samples', type=int, default=100000)
-    parser.add_argument('--batch_sz', type=int, default=128)
+    parser.add_argument('--batch_sz', type=int, default=64)
     parser.add_argument("--map", type=str, default='MoveToBeacon')
     parser.add_argument("--cfg_path", type=str, default='config.json.dist')
     args = parser.parse_args()
@@ -35,9 +35,9 @@ if __name__ == '__main__':
     
     dataset = Dataset()
     dataset.load("replay/"+config.full_id())
-    image_input_shape = np.shape(dataset.input_observations)[1:]
-    actions_input_shape = np.shape(dataset.output_actions)[1:]
-    output_size = actions_input_shape[0]
+    # image_input_shape = np.shape(dataset.input_observations)[1:]
+    # actions_input_shape = np.shape(dataset.output_actions)[1:]
+    # output_size = actions_input_shape[0]
     
     rollouts = [dataset.input_observations, [dataset.output_actions, dataset.output_params]]
 
@@ -48,6 +48,8 @@ if __name__ == '__main__':
             rollouts[i][j] = np.array(rollouts[i][j])
 
     agent = ILAgent(sess, fully_conv, config, args.lr)
+    
+    # print(dataset.input_observations)
 
     n = len(rollouts[0][0])
     epochs = max(1, args.samples // n)
@@ -55,6 +57,7 @@ if __name__ == '__main__':
     print("n_samples %d, epochs: %d, batches: %d" % (n, epochs, n_batches))
     for _ in range(epochs):
         for _ in range(n_batches):
+            print("n:",n)
             idx = np.random.choice(n, args.batch_sz, replace=False)
             sample = [s[idx] for s in rollouts[0]], [a[idx] for a in rollouts[1]]
             res = agent.train(*sample)
