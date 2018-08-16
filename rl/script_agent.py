@@ -8,6 +8,7 @@ import uuid
 
 from pysc2.agents import base_agent
 from pysc2.lib import actions
+from pysc2.lib.actions import FUNCTIONS
 from pysc2.lib import features
 
 from Utils import *
@@ -46,22 +47,22 @@ class MoveToBeacon(base_agent.BaseAgent):
       # target = [int(neutral_x.mean()), int(neutral_y.mean())]
       target = int(neutral_x.mean()) * self.config.SZ + int(neutral_y.mean())
       self.action = _MOVE_SCREEN # 动作函数id
-      self.param[self.config.arg_idx[FUNCTIONS[act].args[0].name]] = [_NOT_QUEUED]
-      self.param[self.config.arg_idx[FUNCTIONS[act].args[1].name]] = [target] # 函数参数
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_NOT_QUEUED]
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = [target] # 函数参数
       # param = [_NOT_QUEUED, target]
     else:
       self.action = _SELECT_ARMY # 动作函数id
       self.param[self.config.arg_idx[FUNCTIONS[act].args[0].name]] = [_SELECT_ALL] # 函数参数
       # param = [_SELECT_ALL]
             
-    self.states.append(np.array([obs.observation, self.action, self.params]))
+    self.states.append(np.array([obs.observation, self.action, self.param]))
 
     if len(self.states) == DATA_SIZE:
       new_file_name = str(uuid.uuid1())
-      np.save("dataset_{}/{}".format(name, new_file_name), np.array(self.states))
+      np.save("dataset_{}/{}".format(self.__class__.__name__, new_file_name), np.array(self.states))
       self.states = []
       
-    return actions.FunctionCall(action, param)
+    return actions.FunctionCall(self.action, self.param)
 
 
 class CollectMineralShards(base_agent.BaseAgent):
@@ -91,21 +92,21 @@ class CollectMineralShards(base_agent.BaseAgent):
           closest, min_dist = p, dist
       self.action = _MOVE_SCREEN # 动作函数id
       # param = [_NOT_QUEUED, closest]
-      self.param[self.config.arg_idx[FUNCTIONS[act].args[0].name]] = [_NOT_QUEUED]
-      self.param[self.config.arg_idx[FUNCTIONS[act].args[1].name]] = [closest[0] * config.SZ +closest[1]]
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_NOT_QUEUED]
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = [closest[0] * config.SZ +closest[1]]
     else:
       self.action = _SELECT_ARMY # 动作函数id
-      self.param[self.config.arg_idx[FUNCTIONS[act].args[0].name]] = [_SELECT_ALL]
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_SELECT_ALL]
       # param = [_SELECT_ALL]
       
-    self.states.append(np.array([obs.observation, action, params]))
+    self.states.append(np.array([obs.observation, self.action, self.param]))
 
     if len(self.states) == DATA_SIZE:
       new_file_name = str(uuid.uuid1())
-      np.save("dataset_{}/{}".format(name, new_file_name), np.array(self.states))
+      np.save("dataset_{}/{}".format(self.__class__.__name__, new_file_name), np.array(self.states))
       self.states = []
       
-    return actions.FunctionCall(action, param)
+    return actions.FunctionCall(self.action, self.param)
 
 
 class DefeatRoaches(base_agent.BaseAgent):
@@ -124,28 +125,28 @@ class DefeatRoaches(base_agent.BaseAgent):
       player_relative = obs.observation["screen"][_PLAYER_RELATIVE]
       roach_y, roach_x = (player_relative == _PLAYER_HOSTILE).nonzero()
       if not roach_y.any():
-        action = _NO_OP
+        self.action = _NO_OP
         # param = []
       index = np.argmax(roach_y)
       # target = [roach_x[index], roach_y[index]]
-      target = roach_x[index]*config.SZ + roach_y[index]
-      action = _ATTACK_SCREEN
+      target = roach_x[index]*SZ + roach_y[index]
+      self.action = _ATTACK_SCREEN
       # param [_NOT_QUEUED, target]
-      self.param[self.config.arg_idx[FUNCTIONS[act].args[0].name]] = [_NOT_QUEUED]
-      self.param[self.config.arg_idx[FUNCTIONS[act].args[1].name]] = [target] # 函数参数
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_NOT_QUEUED]
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[1].name]] = [target] # 函数参数
     elif _SELECT_ARMY in obs.observation["available_actions"]:
-      action = _SELECT_ARMY
-      self.param[self.config.arg_idx[FUNCTIONS[act].args[0].name]] = [_SELECT_ALL]
+      self.action = _SELECT_ARMY
+      self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = [_SELECT_ALL]
       # param = [_SELECT_ALL]
     else:
-      action = _NO_OP,
+      self.action = _NO_OP,
       # param = []
       
-    self.states.append(np.array([obs.observation, action, params]))
+    self.states.append(np.array([obs.observation, self.action, self.param]))
 
     if len(self.states) == DATA_SIZE:
       new_file_name = str(uuid.uuid1())
-      np.save("dataset_{}/{}".format(name, new_file_name), np.array(self.states))
+      np.save("dataset_{}/{}".format(self.__class__.__name__, new_file_name), np.array(self.states))
       self.states = []
       
-    return actions.FunctionCall(action, param)
+    return actions.FunctionCall(self.action, self.param)
