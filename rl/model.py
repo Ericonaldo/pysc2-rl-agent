@@ -71,12 +71,14 @@ def broadcast(tensor, sz):
 
 def mask_probs(probs, mask, restrict=False): # 将 available_actions 中不允许的动作概率置为0, restrict表示是否限制动作输出
     masked = probs * mask # [None, 524]
+    function_mask = np.ones(masked.shape[1])
     if restrict:
         function_mask = np.zeros(masked.shape[1])
         function_mask[FUNCTION_LIST] = 1
-        function_mask = tf.constant(function_mask)
-        function_mask = tf.cast(tf.expand_dims(function_mask, 0), dtype=masked.dtype)
-        masked *= function_mask
+    
+    function_mask = tf.constant(function_mask)
+    function_mask = tf.cast(tf.expand_dims(function_mask, 0), dtype=masked.dtype)
+    masked *= function_mask
 
     correction = tf.cast(
         tf.reduce_sum(masked, axis=-1, keep_dims=True) < 1e-3, dtype=tf.float32
