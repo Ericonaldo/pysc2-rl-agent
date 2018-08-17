@@ -203,7 +203,7 @@ class DefeatRoaches(base_agent.BaseAgent):
       self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _SELECT_ALL
       param = [[_SELECT_ALL]]
     else:
-      self.action = _NO_OP,
+      self.action = _NO_OP
       param = []
       
     

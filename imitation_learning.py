@@ -49,7 +49,7 @@ if __name__ == '__main__':
     #    for j in range(len(rollouts[i])):
     #        rollouts[i][j] = np.array(rollouts[i][j])
 
-    agent = ILAgent(sess, fully_conv, config, args.restore, args.lr)
+    agent = ILAgent(sess, fully_conv, config, args.lr, args.restore)
 
     # for i in rollouts[0]:
     #    print(np.shape(i))

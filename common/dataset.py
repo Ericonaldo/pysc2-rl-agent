@@ -38,6 +38,7 @@ class Dataset:
                     self.input_observations.append(results)
 
                     self.output_actions.append([action]+param)
+                    #print([action]+param)
 
                     # self.output_params.append(param)
 
