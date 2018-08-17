@@ -18,8 +18,8 @@ if __name__ == '__main__':
     parser.add_argument("--sz", type=int, default=32)
     parser.add_argument('--lr', type=float, default=7e-4)
     # parser.add_argument('--samples', type=int, default=10)
-    parser.add_argument('--epochs', type=int, default=10000)
-    parser.add_argument('--batch_sz', type=int, default=128)
+    parser.add_argument('--epochs', type=int, default=1000)
+    parser.add_argument('--batch_sz', type=int, default=256)
     parser.add_argument("--map", type=str, default='MoveToBeacon')
     parser.add_argument("--cfg_path", type=str, default='config.json.dist')
     args = parser.parse_args()
@@ -59,11 +59,12 @@ if __name__ == '__main__':
     n_batches = n_samples // args.batch_sz + 1
     print("n_samples: %d, epochs: %d, batches: %d" % (n_samples, epochs, n_batches))
     for e in range(epochs):
-        print("epoch {}".format(e))
+        print("epoch {} begin".format(e))
         for _ in range(n_batches):
             idx = np.random.choice(n_samples, args.batch_sz, replace=False)
             sample = [s[idx] for s in rollouts[0]], [a[idx] for a in rollouts[1]]
             #print(sample)
             res = agent.train(*sample)
-            print(res)
-    agent.saver.save(sess, 'weights/%s/a2c' % config.full_id(), global_step=agent.step)
+            # print(res)
+        print("after this epoch, loss is ", res)
+        agent.saver.save(sess, 'weights/%s/a2c_%d' % (config.full_id(), e), global_step=agent.step)
