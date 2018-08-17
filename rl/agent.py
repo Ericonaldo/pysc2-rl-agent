@@ -26,6 +26,8 @@ class A2CAgent:
         self.saver = tf.train.Saver()
         if restore:
             self.saver.restore(self.sess, tf.train.latest_checkpoint('weights/' + self.config.full_id()))
+            tf.assign(self.step, 0)
+            
 
         self.summary_op = tf.summary.merge_all()
         self.summary_writer = tf.summary.FileWriter('logs/' + self.config.full_id(), graph=None)

@@ -9,6 +9,8 @@ from rl.agent import clip_log
 from rl.model import fully_conv
 from pysc2.lib.actions import FUNCTIONS
 
+FUNCTION_LIST = np.array(FUNCTIONS)
+
 # TODO extract this to an agent/ module
 class ILAgent:
     def __init__(self, sess, model_fn, config, lr, restore=False, clip_grads=1.):
@@ -60,10 +62,13 @@ class ILAgent:
         return result
     
     # TODO
-    # def mask(self, action_nums, acts):
-        params = [[self.config.arg_idx[FUNCTIONS[a].args[i].name]+1 for i in range(FUNCTIONS[a].args)] for a in action_nums] # 偏移1位
+    '''
+    def mask(self, action_nums, acts):
+        param_list = [[self.config.arg_idx[FUNCTION_LIST[np.array(self.actions[0])].args[i].name]+1] for i in range(FUNCTION_LIST[np.array(self.actions[0])].args)]
+        print(param_list)
         for i in range(action_nums):
             for j, (d, is_spatial) in enumerate(self.config.policy_dims()):
                 if j not in params[i]:
                     acts[i] = acts[i] * np.zeros(acts[i].shape)
+    '''
         
