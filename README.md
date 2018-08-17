@@ -29,8 +29,11 @@ python main.py --map=CollectMineralShards --sz=16 --env=1 --updates=50000 --rest
 python main.py --map=CollectMineralShards --sz=16 --env=1 --updates=50000 --steps=12 --restrict=True
 
 restrict限制输出动作为：
+
 _NOOP = actions.FUNCTIONS.no_op.id
 
 _SELECT_POINT = actions.FUNCTIONS.select_point.id
 
 _MOVE_SCREEN = actions.FUNCTIONS.Move_screen.id
+
+此举是为了限制动作空间，在第二个minimap上学出agent分开，后续加入multi-step
