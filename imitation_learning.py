@@ -18,9 +18,10 @@ if __name__ == '__main__':
     parser.add_argument("--sz", type=int, default=32)
     parser.add_argument('--lr', type=float, default=7e-4)
     # parser.add_argument('--samples', type=int, default=10)
-    parser.add_argument('--epochs', type=int, default=1000)
+    parser.add_argument('--epochs', type=int, default=500)
     parser.add_argument('--batch_sz', type=int, default=256)
     parser.add_argument("--map", type=str, default='MoveToBeacon')
+    parser.add_argument("--restore", type=bool, nargs='?', const=True, default=False)
     parser.add_argument("--cfg_path", type=str, default='config.json.dist')
     args = parser.parse_args()
 
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     #    for j in range(len(rollouts[i])):
     #        rollouts[i][j] = np.array(rollouts[i][j])
 
-    agent = ILAgent(sess, fully_conv, config, args.lr)
+    agent = ILAgent(sess, fully_conv, config, args.restore, args.lr)
 
     # for i in rollouts[0]:
     #    print(np.shape(i))

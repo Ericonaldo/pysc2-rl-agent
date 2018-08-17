@@ -158,6 +158,8 @@ class CollectMineralShards(base_agent.BaseAgent):
       self.param[self.config.arg_idx[FUNCTIONS[self.action].args[0].name]] = _SELECT_ALL
       param = [[_SELECT_ALL]]
 
+    # print("param:", param)
+    # print("self.param", self.param)
     self.states.append([copy.deepcopy(obs.observation), copy.deepcopy(self.action), copy.deepcopy(self.param)])
 
     if len(self.states) == DATA_SIZE:

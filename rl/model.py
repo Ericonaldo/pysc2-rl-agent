@@ -1,7 +1,16 @@
 # -*- coding: utf-8 -*-
 import tensorflow as tf
 from tensorflow.contrib import layers
+from pysc2.lib import actions
+import numpy as np
 
+# Functions
+_NOOP = actions.FUNCTIONS.no_op.id
+_SELECT_POINT = actions.FUNCTIONS.select_point.id
+_MOVE_SCREEN = actions.FUNCTIONS.Move_screen.id
+
+FUNCTION_LIST=[_NOOP, _SELECT_POINT, _MOVE_SCREEN]
+NO_FUNCTION_LIST=[i for i in range(len(actions.FUNCTIONS)) if i not in FUNCTION_LIST]
 # 定义和实现了模型
 
 def fully_conv(config):
@@ -22,7 +31,7 @@ def fully_conv(config):
             policy.append(tf.nn.softmax(layers.flatten(logits))) # [None, 32*32=1024]
         else:
             policy.append(layers.fully_connected(fc1, num_outputs=dim, activation_fn=tf.nn.softmax)) # [None, dim]
-    policy[0] = mask_probs(policy[0], non_spatial_inputs[config.ns_idx['available_actions']]) 
+    policy[0] = mask_probs(policy[0], non_spatial_inputs[config.ns_idx['available_actions']], config.restrict) 
 
     return [policy, value], [screen_input, minimap_input] + non_spatial_inputs # policy[0]是one_hot动作函数，[None, 524];  policy[1:]为13个one_hot参数[[None, dim1], [None, dim2],...], spatial的feature维度是1024
 
@@ -60,8 +69,15 @@ def broadcast(tensor, sz):
     return tf.tile(tf.expand_dims(tf.expand_dims(tensor, 2), 3), [1, 1, sz, sz]) # 扩展维度为 [x, x, sz, sz]
 
 
-def mask_probs(probs, mask): # 将 available_actions 中不允许的动作概率置为0
+def mask_probs(probs, mask, restrict=False): # 将 available_actions 中不允许的动作概率置为0, restrict表示是否限制动作输出
     masked = probs * mask # [None, 524]
+    if restrict:
+        function_mask = np.zeros(masked.shape[1])
+        function_mask[FUNCTION_LIST] = 1
+        function_mask = tf.constant(function_mask)
+        function_mask = tf.cast(tf.expand_dims(function_mask, 0), dtype=masked.dtype)
+        masked *= function_mask
+
     correction = tf.cast(
         tf.reduce_sum(masked, axis=-1, keep_dims=True) < 1e-3, dtype=tf.float32
         ) * (1.0 / (tf.reduce_sum(mask, axis=-1, keep_dims=True) + 1e-12)) * mask  # 第一项判断是否小于阈值， 第二项乘 (1/可用动作数量)

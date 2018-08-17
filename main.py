@@ -27,6 +27,7 @@ if __name__ == '__main__':
     parser.add_argument("--run_id", type=int, default=-1)
     parser.add_argument("--map", type=str, default='MoveToBeacon')
     parser.add_argument("--cfg_path", type=str, default='config.json.dist')
+    parser.add_argument("--restrict", type=bool, default=False)
     parser.add_argument("--test", type=bool, nargs='?', const=True, default=False)
     parser.add_argument("--restore", type=bool, nargs='?', const=True, default=False)
     parser.add_argument('--save_replay', type=bool, nargs='?', const=True, default=False)
@@ -37,7 +38,7 @@ if __name__ == '__main__':
     sess = tf.Session()
 
     # config = Config(args.sz, args.map, lambda _: 1)
-    config = Config(args.sz, args.map, args.run_id) # 进行参数的设置
+    config = Config(args.sz, args.map, args.run_id,restrict=args.restrict) # 进行参数的设置
     os.makedirs('weights/' + config.full_id(), exist_ok=True)
     cfg_path = 'weights/%s/config.json' % config.full_id() # 保存参数的位置
     config.build(cfg_path if args.restore else args.cfg_path) # 建立和设置参数

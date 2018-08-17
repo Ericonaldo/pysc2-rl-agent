@@ -43,10 +43,11 @@ NON_SPATIAL_FEATURES = dict(
 
 class Config:
     # TODO extract embed_dim_fn to config
-    def __init__(self, sz, map, run_id, embed_dim_fn=lambda x: max(1, round(np.log2(x)))):
+    def __init__(self, sz, map, run_id, embed_dim_fn=lambda x: max(1, round(np.log2(x))), restrict=False):
         self.run_id = run_id
         self.sz, self.map = sz, map
         self.embed_dim_fn = embed_dim_fn
+        self.restrict = restrict
         self.feats = self.acts = self.act_args = self.arg_idx = self.ns_idx = None
 
     def build(self, cfg_path):
