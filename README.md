@@ -10,6 +10,10 @@ Add some notes in Chinese
 
 增加了模仿学习，使用脚本生成录像，然后使用录像初始化模型，再使用强化学习，加速收敛。
 
+**branch: param_one_hot**
+
+加入了param的one hot mask，避免在计算loss时计算当前动作函数不具有的参数的loss
+
 ## 模仿学习示例，详细参数见文件：
 
 **使用脚本生成录像replay**
