@@ -20,7 +20,9 @@ class ILAgent:
         self.params_one_hot = [tf.placeholder(tf.float32, [None, config.sz * config.sz]) if is_spatial else tf.placeholder(tf.float32, [None, d]) for _, (d, is_spatial) in enumerate(self.config.policy_dims())]
         #print(self.inputs)
         #print(self.actions)
-
+        
+        for i in range(len(self.policy)):
+            self.policy[i] *= self.params_one_hot[i]
         with tf.variable_scope('loss'):
             acts=[]
             for i, (d, is_spatial) in enumerate(self.config.policy_dims()):
