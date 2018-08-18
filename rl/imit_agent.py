@@ -46,7 +46,7 @@ class ILAgent:
             self.saver.restore(self.sess, tf.train.latest_checkpoint('weights/' + self.config.full_id()))
 
         self.summary_op = tf.summary.merge_all()
-        self.summary_writer = tf.summary.FileWriter('il_logs/' + self.config.full_id(), graph=None)
+        self.summary_writer = tf.summary.FileWriter('supervised_logs/' + self.config.full_id(), graph=None)
 
     def train(self, states, actions):
         # print(len(states))

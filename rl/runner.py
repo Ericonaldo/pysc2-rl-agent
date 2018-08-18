@@ -33,7 +33,7 @@ class Runner:
     def collect_rollout(self): # 交互并收集训练数据
         states, actions = [None]*self.n_steps, [None]*self.n_steps
         rewards, dones, values = np.zeros((3, self.n_steps, self.envs.num_envs))
-
+        
         for step in range(self.n_steps):
             action, values[step] = self.agent.act(self.state)
             # print('-----', len(action))

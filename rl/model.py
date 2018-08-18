@@ -76,6 +76,7 @@ def mask_probs(probs, mask, restrict=False): # 将 available_actions 中不允�
         function_mask = np.zeros(masked.shape[1])
         function_mask[FUNCTION_LIST] = 1
     
+    # print('------',function_mask)
     function_mask = tf.constant(function_mask)
     function_mask = tf.cast(tf.expand_dims(function_mask, 0), dtype=masked.dtype)
     masked *= function_mask

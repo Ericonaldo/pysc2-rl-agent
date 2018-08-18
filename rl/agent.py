@@ -26,7 +26,8 @@ class A2CAgent:
         self.saver = tf.train.Saver()
         if restore:
             self.saver.restore(self.sess, tf.train.latest_checkpoint('weights/' + self.config.full_id()))
-            tf.assign(self.step, 0)
+            if self.config.imitation:
+                self.sess.run(tf.assign(self.step, 0))
             
 
         self.summary_op = tf.summary.merge_all()
@@ -39,11 +40,6 @@ class A2CAgent:
             self.saver.save(self.sess, 'weights/%s/a2c' % self.config.full_id(), global_step=self.step)
 
         returns = self._compute_returns(rewards, dones, last_value)
-
-        #print(len(states))
-        #for i in states:
-        #    print(i.shape)
-        #print(len(actions))
 
         feed_dict = dict(zip(self.inputs + self.loss_inputs, states + actions + [returns])) # 你非得写成这样令人看了得转个弯才能看懂吗
         result, result_summary, step = self.sess.run([self.train_op, self.summary_op, self.step], feed_dict) # 每次训练都记录summary
