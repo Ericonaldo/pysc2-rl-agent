@@ -246,10 +246,10 @@ if __name__ == "__main__":
     
     maps.get(FLAGS.map)  # Assert the map exists.
     FLAGS.screen_resolution = FLAGS.minimap_resolution = FLAGS.sz # 强制让screen和minimap的大小都为sz
-    config = Config(FLAGS.sz, FLAGS.map, -1) # 进行参数的设置
-    os.makedirs('script_weights/' + config.full_id(), exist_ok=True)
+    config = Config(FLAGS.sz, FLAGS.map, -1, imitation=True) # 进行参数的设置
+    os.makedirs('weights/' + config.full_id(), exist_ok=True)
     os.makedirs('replay/' + config.full_id(), exist_ok=True)
-    cfg_path = 'script_weights/%s/config.json' % config.full_id() # 保存参数的位置
+    cfg_path = 'weights/%s/config.json' % config.full_id() # 保存参数的位置
     config.build('config.json.dist') # 建立和设置参数
     config.save(cfg_path)
 

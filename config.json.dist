@@ -1,5 +1,7 @@
 {
   "feats": {
+    "screen": ["player_relative"],
+    "minimap": ["player_relative"],
     "non_spatial": ["player", "available_actions"]
   }
 }

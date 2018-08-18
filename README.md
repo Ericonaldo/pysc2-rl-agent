@@ -22,7 +22,7 @@ python imitation_learning.py --map=CollectMineralShards --sz=16
 
 **强化学习，从预训练好的Model中读取**
 
-python main.py --map=CollectMineralShards --sz=16 --env=1 --updates=50000 --restore=True --steps=12
+python main.py --map=CollectMineralShards --sz=16 --env=1 --updates=50000 --restore=True --steps=12 --imitation=True
 
 ## 强化学习A2C训练
 

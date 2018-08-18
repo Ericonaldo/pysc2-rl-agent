@@ -43,11 +43,12 @@ NON_SPATIAL_FEATURES = dict(
 
 class Config:
     # TODO extract embed_dim_fn to config
-    def __init__(self, sz, map, run_id, embed_dim_fn=lambda x: max(1, round(np.log2(x))), restrict=False):
+    def __init__(self, sz, map, run_id, embed_dim_fn=lambda x: max(1, round(np.log2(x))), restrict=False, imitation=False):
         self.run_id = run_id
         self.sz, self.map = sz, map
         self.embed_dim_fn = embed_dim_fn
         self.restrict = restrict
+        self.imitation = imitation
         self.feats = self.acts = self.act_args = self.arg_idx = self.ns_idx = None
 
     def build(self, cfg_path):
@@ -74,6 +75,8 @@ class Config:
         self.ns_idx = {f: i for i, f in enumerate(self.feats['non_spatial'])} #生成对应的字典，参数名：序号
 
     def map_id(self):
+        if self.imitation:
+            return self.map + str(self.sz) + '_imitation'
         return self.map + str(self.sz)
 
     def full_id(self):

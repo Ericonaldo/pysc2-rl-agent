@@ -16,7 +16,8 @@ class ILAgent:
     def __init__(self, sess, model_fn, config, lr, restore=False, clip_grads=1.):
         self.sess, self.config, self.lr = sess, config, lr
         (self.policy, self.value), self.inputs = model_fn(config) # self.inputs = [screen_input, minimap_input] + non_spatial_inputs
-        self.actions = [tf.placeholder(tf.int32, [None]) for _ in range(len(self.policy))] # policy is a list, actions is a list  每个元素对应动作函数或参数
+        self.actions = [tf.placeholder(tf.int32, [None]) for _ in range(len(self.policy))] # policy is a list, actions is a list  每个元素对应动作函数或参数       
+        self.params_one_hot = [tf.placeholder(tf.float32, [None, config.sz * config.sz]) if is_spatial else tf.placeholder(tf.float32, [None, d]) for _, (d, is_spatial) in enumerate(self.config.policy_dims())]
         #print(self.inputs)
         #print(self.actions)
 
@@ -24,10 +25,10 @@ class ILAgent:
             acts=[]
             for i, (d, is_spatial) in enumerate(self.config.policy_dims()):
                 if is_spatial:
-                    acts.append(tf.one_hot(self.actions[i], config.sz * config.sz))
+                    temp = tf.one_hot(self.actions[i], config.sz * config.sz)
                 else:
-                    acts.append(tf.one_hot(self.actions[i], d))
-            # acts = self.mask(self.actions[0], acts) # TODO
+                    temp = tf.one_hot(self.actions[i], d)
+                acts.append(temp * self.params_one_hot[i])
             ce = sum([-tf.reduce_sum(a * clip_log(p), axis=-1) for a, p in zip(acts, self.policy)])
             ce_loss = tf.reduce_mean(ce)
             val_loss = 0 * tf.reduce_mean(self.value) # hack to match a2c agent computational graph
@@ -48,13 +49,13 @@ class ILAgent:
         self.summary_op = tf.summary.merge_all()
         self.summary_writer = tf.summary.FileWriter('supervised_logs/' + self.config.full_id(), graph=None)
 
-    def train(self, states, actions):
+    def train(self, states, actions, param_list):
         # print(len(states))
         # for i in states:
         #     print(i.shape)
         # print(len(actions))
         # feed_dict = {self.inputs: states, self.actions: actions}
-        feed_dict = dict(zip(self.inputs + self.actions, states + actions))
+        feed_dict = dict(zip(self.inputs + self.actions + self.params_one_hot, states + actions + param_list))
         result, result_summary, step = self.sess.run([self.train_op, self.summary_op, self.step], feed_dict)
 
         self.summary_writer.add_summary(result_summary, step)
