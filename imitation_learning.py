@@ -30,8 +30,8 @@ if __name__ == '__main__':
     sess = tf.Session()
 
     config = Config(args.sz, args.map, -1)
-    os.makedirs('weights/' + config.full_id(), exist_ok=True)
-    cfg_path = 'weights/%s/config.json' % config.full_id()
+    os.makedirs('weights/' + config.full_id() + '_imitation', exist_ok=True)
+    cfg_path = 'weights/%s_imitation/config.json' % config.full_id()
     config.build(args.cfg_path)
     config.save(cfg_path)
     
