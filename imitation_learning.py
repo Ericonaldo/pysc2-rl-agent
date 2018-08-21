@@ -68,4 +68,4 @@ if __name__ == '__main__':
             res = agent.train(*sample)
             # print(res)
         print("after this epoch, loss is ", res)
-        agent.saver.save(sess, 'weights/%s/a2c_%d' % (config.full_id(), e), global_step=agent.step)
+        agent.saver.save(sess, 'weights/%s/a2c_%d' % (config.full_id()+'_imitation', e), global_step=agent.step)
